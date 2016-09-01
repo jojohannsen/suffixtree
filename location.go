@@ -16,7 +16,7 @@ import "fmt"
 //   offsetFromTop: how many characters into edge (between 1 and edge length-1)
 //
 type Location struct {
-	edge          *Edge
+	Edge          *Edge
 	OnNode        bool
 	OffsetFromTop int64
 	Base          Node
@@ -31,8 +31,8 @@ func (location *Location) String() string {
 		return "Location=NIL"
 	}
 	edge := "nil"
-	if location.edge != nil {
-		edge = fmt.Sprintf("%s", location.edge)
+	if location.Edge != nil {
+		edge = fmt.Sprintf("%s", location.Edge)
 	}
 	node := "nil"
 	if location.Base != nil {

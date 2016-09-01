@@ -6,7 +6,7 @@ type Ukkonen interface {
 	Extend() bool
 	Finish()
 	Debug(dChan chan string)
-	drainDataSource()
+	DrainDataSource()
 	Tree() SuffixTree
 	Location() *Location
 	DataSource() DataSource
@@ -45,7 +45,7 @@ func NewUkkonen(dataSource DataSource) Ukkonen {
 		NewBuilder(dataSource), NewTraverser(dataSource), nil}
 }
 
-func (b *ukkonen) drainDataSource() {
+func (b *ukkonen) DrainDataSource() {
 	for b.Extend() {
 	}
 }
@@ -92,7 +92,7 @@ func (b *ukkonen) finish(value STKey) {
 		// if it's not the root, we will be creating it here, and have to set it
 		// after it gets created
 		if b.location.Base.isRoot() && b.needsSuffixLink != nil {
-			b.needsSuffixLink.setSuffixLink(b.location.Base)
+			b.needsSuffixLink.SetSuffixLink(b.location.Base)
 			b.needsSuffixLink = nil
 		}
 	}
@@ -112,11 +112,11 @@ func (b *ukkonen) extendWithValue(value STKey) bool {
 		}
 		// if the previous node needs a suffix link, this is the place
 		if b.needsSuffixLink != nil {
-			b.needsSuffixLink.setSuffixLink(b.location.Base)
+			b.needsSuffixLink.SetSuffixLink(b.location.Base)
 			b.needsSuffixLink = nil
 		}
 		// if child value is there, just update location
-		if b.location.Base.edgeFollowing(value) != nil {
+		if b.location.Base.EdgeFollowing(value) != nil {
 			b.traverser.traverseOne(b.location, value)
 			return false
 		} else {
@@ -131,7 +131,7 @@ func (b *ukkonen) extendWithValue(value STKey) bool {
 			b.debugChannel <- fmt.Sprintf("We are on edge offset %d for node %d", b.location.OffsetFromTop, b.location.Base.Id())
 		}
 		// we are on the edge, see if the character at the offset matches
-		valueOffset := b.location.edge.StartOffset + b.location.OffsetFromTop
+		valueOffset := b.location.Edge.StartOffset + b.location.OffsetFromTop
 		if b.dataSource.keyAtOffset(valueOffset) == value {
 			// Rule 3, value already in tree, change location and we are done
 			b.location.OffsetFromTop++
@@ -139,20 +139,20 @@ func (b *ukkonen) extendWithValue(value STKey) bool {
 		} else if b.location.Base.isRoot() {
 			// add leaf, set location
 			leafEdge, leafNode := NewLeafEdgeNode(b.root, b.offset)
-			b.location.Base.addOutgoingEdgeNode(value, leafEdge, leafNode)
+			b.location.Base.AddOutgoingEdgeNode(value, leafEdge, leafNode)
 			b.location.Base = leafNode
 			b.location.OffsetFromTop = 0
 		} else {
 			// Rule 2
 			// - split the edge, and let builder know the new Node needs a suffix link on the next extension
 			previousNeedsSuffixLink := b.needsSuffixLink
-			b.needsSuffixLink = b.builder.split(b.location.Base.parent(), b.location.Base, b.location.edge, b.location.OffsetFromTop)
+			b.needsSuffixLink = b.builder.split(b.location.Base.parent(), b.location.Base, b.location.Edge, b.location.OffsetFromTop)
 			if previousNeedsSuffixLink != nil {
-				previousNeedsSuffixLink.setSuffixLink(b.needsSuffixLink)
+				previousNeedsSuffixLink.SetSuffixLink(b.needsSuffixLink)
 			}
 			// - add the new leaf node
 			leafEdge, leafNode := NewLeafEdgeNode(b.needsSuffixLink, b.offset)
-			b.needsSuffixLink.addOutgoingEdgeNode(value, leafEdge, leafNode)
+			b.needsSuffixLink.AddOutgoingEdgeNode(value, leafEdge, leafNode)
 
 			// after the split, we are located on the internal node
 			b.location.Base = b.needsSuffixLink

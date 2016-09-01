@@ -52,9 +52,9 @@ func (t *traverser) traverseUp(location *Location) {
 	location.OnNode = true
 	t.numberValuesTraversed = location.OffsetFromTop
 	location.OffsetFromTop = 0
-	t.traversedDataOffset = location.edge.StartOffset + location.OffsetFromTop
+	t.traversedDataOffset = location.Edge.StartOffset + location.OffsetFromTop
 	location.Base = location.Base.parent()
-	location.edge = location.Base.IncomingEdge()
+	location.Edge = location.Base.IncomingEdge()
 }
 
 func (t *traverser) traverseSuffixLink(location *Location) {
@@ -62,22 +62,22 @@ func (t *traverser) traverseSuffixLink(location *Location) {
 		t.numberValuesTraversed -= 1
 		t.traversedDataOffset += 1
 	} else {
-		location.Base = location.Base.suffixLink()
+		location.Base = location.Base.SuffixLink()
 	}
 }
 
 func (t *traverser) traverseOne(location *Location, value STKey) {
-	location.edge = location.Base.edgeFollowing(value)
+	location.Edge = location.Base.EdgeFollowing(value)
 	location.Base = location.Base.NodeFollowing(value)
-	location.OnNode = (location.edge.EndOffset != FinalOffset) && (location.edge.length() == 1)
-	if (location.edge.EndOffset == FinalOffset) || (location.edge.length() > 1) {
+	location.OnNode = (location.Edge.EndOffset != FinalOffset) && (location.Edge.length() == 1)
+	if (location.Edge.EndOffset == FinalOffset) || (location.Edge.length() > 1) {
 		location.OffsetFromTop = 1
 	}
 }
 
 func (t *traverser) traverseEdgeValue(location *Location) {
 	location.OffsetFromTop++
-	if location.OffsetFromTop == location.edge.length() {
+	if location.OffsetFromTop == location.Edge.length() {
 		location.OnNode = true
 		location.OffsetFromTop = 0
 	}
@@ -86,8 +86,8 @@ func (t *traverser) traverseEdgeValue(location *Location) {
 // skip count down traversal
 func (t *traverser) traverseDown(location *Location) {
 	for t.numberValuesTraversed > 0 {
-		location.edge, location.Base = location.Base.outgoingEdgeNode(t.dataSource.keyAtOffset(t.traversedDataOffset))
-		edgeLength := location.edge.length()
+		location.Edge, location.Base = location.Base.outgoingEdgeNode(t.dataSource.keyAtOffset(t.traversedDataOffset))
+		edgeLength := location.Edge.length()
 		if (t.numberValuesTraversed < edgeLength) || (edgeLength == EdgeTerminatesAtEnd) {
 			location.OffsetFromTop = t.numberValuesTraversed
 			t.numberValuesTraversed = 0

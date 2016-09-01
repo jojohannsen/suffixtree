@@ -2,9 +2,9 @@ package suffixtree
 
 import (
 	"fmt"
+	"reflect"
 	"sort"
 	"strings"
-	"reflect"
 )
 
 func treePrintWithTitle(title string, node Node, location *Location) {
@@ -20,6 +20,19 @@ func treePrint(node Node, indentLevel int, indentString string) {
 		} else {
 			treePrint(node, indentLevel+1, indentString)
 		}
+	}
+}
+
+func StrToNode(root Node, s string) Node {
+	if s == "root" {
+		return root
+	} else {
+		strs := strings.Split(s, ",")
+		node := root
+		for _, s := range strs {
+			node = node.NodeFollowing(STKey(rune(s[0])))
+		}
+		return node
 	}
 }
 
@@ -43,16 +56,17 @@ func suffixChildrenIncludesNodeChildren(nodeChildren, suffixChildren []STKey) bo
 }
 
 type stkarr []STKey
-func (a stkarr) Len() int { return len(a) }
-func (a stkarr) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+
+func (a stkarr) Len() int           { return len(a) }
+func (a stkarr) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a stkarr) Less(i, j int) bool { return a[i] < a[j] }
 func TreeCheck(node Node, dataSource DataSource) {
 	edgeChildren := stkarr{}
 	nodeChildren := stkarr{}
-	for k,_ := range node.outgoingNodeMap() {
+	for k, _ := range node.outgoingNodeMap() {
 		nodeChildren = append(nodeChildren, k)
 	}
-	for k,_ := range node.OutgoingEdgeMap() {
+	for k, _ := range node.OutgoingEdgeMap() {
 		edgeChildren = append(edgeChildren, k)
 	}
 	sort.Sort(nodeChildren)
@@ -62,28 +76,28 @@ func TreeCheck(node Node, dataSource DataSource) {
 		panic("HELP!")
 	}
 	if node.isInternal() {
-		if node.suffixLink() == nil {
+		if node.SuffixLink() == nil {
 			fmt.Printf("Internal node has no suffix link")
 			panic("HELP!")
-		} 
+		}
 		suffixNodeChildren := stkarr{}
-		for k,_ := range node.suffixLink().outgoingNodeMap() {
+		for k, _ := range node.SuffixLink().outgoingNodeMap() {
 			suffixNodeChildren = append(suffixNodeChildren, k)
 		}
 		sort.Sort(suffixNodeChildren)
 		//if !suffixChildrenIncludesNodeChildren(nodeChildren, suffixNodeChildren) {
 		//	fmt.Printf("Suffix doesn't have same children as place linking to it")
 		//	fmt.Println("nodeChildren: ", nodeChildren, ", suffixNodeChildren: ", suffixNodeChildren)
-			//panic("HELP!")
+		//panic("HELP!")
 		//}
 		pathToxNode := pathToNode(node, dataSource)
-		pathToSuffix := pathToNode(node.suffixLink(), dataSource)
+		pathToSuffix := pathToNode(node.SuffixLink(), dataSource)
 		if len(pathToxNode) != (len(pathToSuffix) + 1) {
 			fmt.Println("Unexpected path lengths, pathToNode=", pathToxNode, ", pathToSuffix=", pathToSuffix)
 			panic("HELP!")
 		}
 	}
-	for _,n := range node.OutgoingNodes() {
+	for _, n := range node.OutgoingNodes() {
 		TreeCheck(n, dataSource)
 	}
 }

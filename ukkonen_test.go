@@ -1,13 +1,14 @@
 package suffixtree
 
 import (
-	"strings"
 	"testing"
+
+	"github.com/jojohannsen/suffixtree"
 )
 
 func TestBuilder(t *testing.T) {
-	dataSource := NewStringDataSource("mississippi")
-	ukkonen := NewUkkonen(dataSource)
+	dataSource := suffixtree.NewStringDataSource("mississippi")
+	ukkonen := suffixtree.NewUkkonen(dataSource)
 	if ukkonen == nil {
 		t.Error("NewBuilder returned nil, want a builder")
 	}
@@ -31,15 +32,15 @@ func TestBuilder(t *testing.T) {
 func TestBuilderExtend_1(t *testing.T) {
 	tests := []struct {
 		title                   string
-		key                     STKey
+		key                     suffixtree.STKey
 		numberOutgoing          int
 		incomingEdgeStartOffset int64
 		incomingEdgeEndOffset   int64
 	}{
-		{"root", STKey(rune('m')), 0, 0, -1},
+		{"root", suffixtree.STKey(rune('m')), 0, 0, -1},
 	}
-	dataSource := NewStringDataSource("mississippi")
-	ukkonen := NewUkkonen(dataSource)
+	dataSource := suffixtree.NewStringDataSource("mississippi")
+	ukkonen := suffixtree.NewUkkonen(dataSource)
 
 	ukkonen.Extend() // 'm'
 
@@ -47,12 +48,12 @@ func TestBuilderExtend_1(t *testing.T) {
 	root := tree.Root()
 	for _, test := range tests {
 		node := root.NodeFollowing(test.key)
-		edge := root.edgeFollowing(test.key)
+		edge := root.EdgeFollowing(test.key)
 		if node == nil {
 			t.Errorf("%s: Node not found", test.title)
 		}
-		if node.numberOutgoing() != test.numberOutgoing {
-			t.Errorf("%s: got %d outgoing, want %d", test.title, node.numberOutgoing(), test.numberOutgoing)
+		if node.NumberOutgoing() != test.numberOutgoing {
+			t.Errorf("%s: got %d outgoing, want %d", test.title, node.NumberOutgoing(), test.numberOutgoing)
 		}
 		if edge == nil {
 			t.Errorf("%s: Edge not found", test.title)
@@ -66,16 +67,16 @@ func TestBuilderExtend_1(t *testing.T) {
 func TestBuilderExtend_2(t *testing.T) {
 	tests := []struct {
 		title                   string
-		key                     STKey
+		key                     suffixtree.STKey
 		numberOutgoing          int
 		incomingEdgeStartOffset int64
 		incomingEdgeEndOffset   int64
 	}{
-		{"root", STKey(rune('m')), 0, 0, -1},
-		{"root", STKey(rune('i')), 0, 1, -1},
+		{"root", suffixtree.STKey(rune('m')), 0, 0, -1},
+		{"root", suffixtree.STKey(rune('i')), 0, 1, -1},
 	}
-	dataSource := NewStringDataSource("mississippi")
-	ukkonen := NewUkkonen(dataSource)
+	dataSource := suffixtree.NewStringDataSource("mississippi")
+	ukkonen := suffixtree.NewUkkonen(dataSource)
 
 	ukkonen.Extend() // 'm'
 	ukkonen.Extend() // 'i'
@@ -84,12 +85,12 @@ func TestBuilderExtend_2(t *testing.T) {
 	root := tree.Root()
 	for _, test := range tests {
 		node := root.NodeFollowing(test.key)
-		edge := root.edgeFollowing(test.key)
+		edge := root.EdgeFollowing(test.key)
 		if node == nil {
 			t.Errorf("%s: Node not found", test.title)
 		}
-		if node.numberOutgoing() != test.numberOutgoing {
-			t.Errorf("%s: got %d outgoing, want %d", test.title, node.numberOutgoing(), test.numberOutgoing)
+		if node.NumberOutgoing() != test.numberOutgoing {
+			t.Errorf("%s: got %d outgoing, want %d", test.title, node.NumberOutgoing(), test.numberOutgoing)
 		}
 		if edge == nil {
 			t.Errorf("%s: Edge not found", test.title)
@@ -103,17 +104,17 @@ func TestBuilderExtend_2(t *testing.T) {
 func TestBuilderExtend_3(t *testing.T) {
 	tests := []struct {
 		title                   string
-		key                     STKey
+		key                     suffixtree.STKey
 		numberOutgoing          int
 		incomingEdgeStartOffset int64
 		incomingEdgeEndOffset   int64
 	}{
-		{"root", STKey(rune('m')), 0, 0, -1},
-		{"root", STKey(rune('i')), 0, 1, -1},
-		{"root", STKey(rune('s')), 0, 2, -1},
+		{"root", suffixtree.STKey(rune('m')), 0, 0, -1},
+		{"root", suffixtree.STKey(rune('i')), 0, 1, -1},
+		{"root", suffixtree.STKey(rune('s')), 0, 2, -1},
 	}
-	dataSource := NewStringDataSource("mississippi")
-	ukkonen := NewUkkonen(dataSource)
+	dataSource := suffixtree.NewStringDataSource("mississippi")
+	ukkonen := suffixtree.NewUkkonen(dataSource)
 
 	ukkonen.Extend() // 'm'
 	ukkonen.Extend() // 'i'
@@ -123,12 +124,12 @@ func TestBuilderExtend_3(t *testing.T) {
 	root := tree.Root()
 	for _, test := range tests {
 		node := root.NodeFollowing(test.key)
-		edge := root.edgeFollowing(test.key)
+		edge := root.EdgeFollowing(test.key)
 		if node == nil {
 			t.Errorf("%s: Node not found", test.title)
 		}
-		if node.numberOutgoing() != test.numberOutgoing {
-			t.Errorf("%s: got %d outgoing, want %d", test.title, node.numberOutgoing(), test.numberOutgoing)
+		if node.NumberOutgoing() != test.numberOutgoing {
+			t.Errorf("%s: got %d outgoing, want %d", test.title, node.NumberOutgoing(), test.numberOutgoing)
 		}
 		if edge == nil {
 			t.Errorf("%s: Edge not found", test.title)
@@ -142,17 +143,17 @@ func TestBuilderExtend_3(t *testing.T) {
 func TestBuilderExtend_4(t *testing.T) {
 	tests := []struct {
 		title                   string
-		key                     STKey
+		key                     suffixtree.STKey
 		numberOutgoing          int
 		incomingEdgeStartOffset int64
 		incomingEdgeEndOffset   int64
 	}{
-		{"root", STKey(rune('m')), 0, 0, -1},
-		{"root", STKey(rune('i')), 0, 1, -1},
-		{"root", STKey(rune('s')), 0, 2, -1},
+		{"root", suffixtree.STKey(rune('m')), 0, 0, -1},
+		{"root", suffixtree.STKey(rune('i')), 0, 1, -1},
+		{"root", suffixtree.STKey(rune('s')), 0, 2, -1},
 	}
-	dataSource := NewStringDataSource("mississippi")
-	ukkonen := NewUkkonen(dataSource)
+	dataSource := suffixtree.NewStringDataSource("mississippi")
+	ukkonen := suffixtree.NewUkkonen(dataSource)
 
 	ukkonen.Extend() // 'm'
 	ukkonen.Extend() // 'i'
@@ -163,12 +164,12 @@ func TestBuilderExtend_4(t *testing.T) {
 	root := tree.Root()
 	for _, test := range tests {
 		node := root.NodeFollowing(test.key)
-		edge := root.edgeFollowing(test.key)
+		edge := root.EdgeFollowing(test.key)
 		if node == nil {
 			t.Errorf("%s: Node not found", test.title)
 		}
-		if node.numberOutgoing() != test.numberOutgoing {
-			t.Errorf("%s: got %d outgoing, want %d", test.title, node.numberOutgoing(), test.numberOutgoing)
+		if node.NumberOutgoing() != test.numberOutgoing {
+			t.Errorf("%s: got %d outgoing, want %d", test.title, node.NumberOutgoing(), test.numberOutgoing)
 		}
 		if edge == nil {
 			t.Errorf("%s: Edge not found", test.title)
@@ -179,35 +180,22 @@ func TestBuilderExtend_4(t *testing.T) {
 	}
 }
 
-func strToNode(root Node, s string) Node {
-	if s == "root" {
-		return root
-	} else {
-		strs := strings.Split(s, ",")
-		node := root
-		for _, s := range strs {
-			node = node.NodeFollowing(STKey(rune(s[0])))
-		}
-		return node
-	}
-}
-
 func TestBuilderExtend_5(t *testing.T) {
 	tests := []struct {
 		title                   string
-		key                     STKey
+		key                     suffixtree.STKey
 		numberOutgoing          int
 		incomingEdgeStartOffset int64
 		incomingEdgeEndOffset   int64
 	}{
-		{"root", STKey(rune('m')), 0, 0, -1},
-		{"root", STKey(rune('i')), 0, 1, -1},
-		{"root", STKey(rune('s')), 2, 2, 2},
-		{"s", STKey(rune('s')), 0, 3, -1},
-		{"s", STKey(rune('i')), 0, 4, -1},
+		{"root", suffixtree.STKey(rune('m')), 0, 0, -1},
+		{"root", suffixtree.STKey(rune('i')), 0, 1, -1},
+		{"root", suffixtree.STKey(rune('s')), 2, 2, 2},
+		{"s", suffixtree.STKey(rune('s')), 0, 3, -1},
+		{"s", suffixtree.STKey(rune('i')), 0, 4, -1},
 	}
-	dataSource := NewStringDataSource("mississippi")
-	ukkonen := NewUkkonen(dataSource)
+	dataSource := suffixtree.NewStringDataSource("mississippi")
+	ukkonen := suffixtree.NewUkkonen(dataSource)
 
 	ukkonen.Extend() // 'm'
 	ukkonen.Extend() // 'i'
@@ -218,14 +206,14 @@ func TestBuilderExtend_5(t *testing.T) {
 	tree := ukkonen.Tree()
 	root := tree.Root()
 	for _, test := range tests {
-		baseNode := strToNode(root, test.title)
+		baseNode := suffixtree.StrToNode(root, test.title)
 		node := baseNode.NodeFollowing(test.key)
-		edge := baseNode.edgeFollowing(test.key)
+		edge := baseNode.EdgeFollowing(test.key)
 		if node == nil {
 			t.Errorf("%s: Node not found", test.title)
 		}
-		if node.numberOutgoing() != test.numberOutgoing {
-			t.Errorf("%s: got %d outgoing, want %d", test.title, node.numberOutgoing(), test.numberOutgoing)
+		if node.NumberOutgoing() != test.numberOutgoing {
+			t.Errorf("%s: got %d outgoing, want %d", test.title, node.NumberOutgoing(), test.numberOutgoing)
 		}
 		if edge == nil {
 			t.Errorf("%s: Edge not found", test.title)
@@ -239,19 +227,19 @@ func TestBuilderExtend_5(t *testing.T) {
 func TestBuilderExtend_6(t *testing.T) {
 	tests := []struct {
 		title                   string
-		key                     STKey
+		key                     suffixtree.STKey
 		numberOutgoing          int
 		incomingEdgeStartOffset int64
 		incomingEdgeEndOffset   int64
 	}{
-		{"root", STKey(rune('m')), 0, 0, -1},
-		{"root", STKey(rune('i')), 0, 1, -1},
-		{"root", STKey(rune('s')), 2, 2, 2},
-		{"s", STKey(rune('s')), 0, 3, -1},
-		{"s", STKey(rune('i')), 0, 4, -1},
+		{"root", suffixtree.STKey(rune('m')), 0, 0, -1},
+		{"root", suffixtree.STKey(rune('i')), 0, 1, -1},
+		{"root", suffixtree.STKey(rune('s')), 2, 2, 2},
+		{"s", suffixtree.STKey(rune('s')), 0, 3, -1},
+		{"s", suffixtree.STKey(rune('i')), 0, 4, -1},
 	}
-	dataSource := NewStringDataSource("mississippi")
-	ukkonen := NewUkkonen(dataSource)
+	dataSource := suffixtree.NewStringDataSource("mississippi")
+	ukkonen := suffixtree.NewUkkonen(dataSource)
 
 	ukkonen.Extend() // 'm'
 	ukkonen.Extend() // 'i'
@@ -263,14 +251,14 @@ func TestBuilderExtend_6(t *testing.T) {
 	tree := ukkonen.Tree()
 	root := tree.Root()
 	for _, test := range tests {
-		baseNode := strToNode(root, test.title)
+		baseNode := suffixtree.StrToNode(root, test.title)
 		node := baseNode.NodeFollowing(test.key)
-		edge := baseNode.edgeFollowing(test.key)
+		edge := baseNode.EdgeFollowing(test.key)
 		if node == nil {
 			t.Errorf("%s: Node not found", test.title)
 		}
-		if node.numberOutgoing() != test.numberOutgoing {
-			t.Errorf("%s: got %d outgoing, want %d", test.title, node.numberOutgoing(), test.numberOutgoing)
+		if node.NumberOutgoing() != test.numberOutgoing {
+			t.Errorf("%s: got %d outgoing, want %d", test.title, node.NumberOutgoing(), test.numberOutgoing)
 		}
 		if edge == nil {
 			t.Errorf("%s: Edge not found", test.title)
@@ -284,19 +272,19 @@ func TestBuilderExtend_6(t *testing.T) {
 func TestBuilderExtend_7(t *testing.T) {
 	tests := []struct {
 		title                   string
-		key                     STKey
+		key                     suffixtree.STKey
 		numberOutgoing          int
 		incomingEdgeStartOffset int64
 		incomingEdgeEndOffset   int64
 	}{
-		{"root", STKey(rune('m')), 0, 0, -1},
-		{"root", STKey(rune('i')), 0, 1, -1},
-		{"root", STKey(rune('s')), 2, 2, 2},
-		{"s", STKey(rune('s')), 0, 3, -1},
-		{"s", STKey(rune('i')), 0, 4, -1},
+		{"root", suffixtree.STKey(rune('m')), 0, 0, -1},
+		{"root", suffixtree.STKey(rune('i')), 0, 1, -1},
+		{"root", suffixtree.STKey(rune('s')), 2, 2, 2},
+		{"s", suffixtree.STKey(rune('s')), 0, 3, -1},
+		{"s", suffixtree.STKey(rune('i')), 0, 4, -1},
 	}
-	dataSource := NewStringDataSource("mississippi")
-	ukkonen := NewUkkonen(dataSource)
+	dataSource := suffixtree.NewStringDataSource("mississippi")
+	ukkonen := suffixtree.NewUkkonen(dataSource)
 
 	ukkonen.Extend() // 'm'
 	ukkonen.Extend() // 'i'
@@ -309,14 +297,14 @@ func TestBuilderExtend_7(t *testing.T) {
 	tree := ukkonen.Tree()
 	root := tree.Root()
 	for _, test := range tests {
-		baseNode := strToNode(root, test.title)
+		baseNode := suffixtree.StrToNode(root, test.title)
 		node := baseNode.NodeFollowing(test.key)
-		edge := baseNode.edgeFollowing(test.key)
+		edge := baseNode.EdgeFollowing(test.key)
 		if node == nil {
 			t.Errorf("%s: Node not found", test.title)
 		}
-		if node.numberOutgoing() != test.numberOutgoing {
-			t.Errorf("%s: got %d outgoing, want %d", test.title, node.numberOutgoing(), test.numberOutgoing)
+		if node.NumberOutgoing() != test.numberOutgoing {
+			t.Errorf("%s: got %d outgoing, want %d", test.title, node.NumberOutgoing(), test.numberOutgoing)
 		}
 		if edge == nil {
 			t.Errorf("%s: Edge not found", test.title)
@@ -330,19 +318,19 @@ func TestBuilderExtend_7(t *testing.T) {
 func TestBuilderExtend_8(t *testing.T) {
 	tests := []struct {
 		title                   string
-		key                     STKey
+		key                     suffixtree.STKey
 		numberOutgoing          int
 		incomingEdgeStartOffset int64
 		incomingEdgeEndOffset   int64
 	}{
-		{"root", STKey(rune('m')), 0, 0, -1},
-		{"root", STKey(rune('i')), 0, 1, -1},
-		{"root", STKey(rune('s')), 2, 2, 2},
-		{"s", STKey(rune('s')), 0, 3, -1},
-		{"s", STKey(rune('i')), 0, 4, -1},
+		{"root", suffixtree.STKey(rune('m')), 0, 0, -1},
+		{"root", suffixtree.STKey(rune('i')), 0, 1, -1},
+		{"root", suffixtree.STKey(rune('s')), 2, 2, 2},
+		{"s", suffixtree.STKey(rune('s')), 0, 3, -1},
+		{"s", suffixtree.STKey(rune('i')), 0, 4, -1},
 	}
-	dataSource := NewStringDataSource("mississippi")
-	ukkonen := NewUkkonen(dataSource)
+	dataSource := suffixtree.NewStringDataSource("mississippi")
+	ukkonen := suffixtree.NewUkkonen(dataSource)
 
 	ukkonen.Extend() // 'm'
 	ukkonen.Extend() // 'i'
@@ -356,14 +344,14 @@ func TestBuilderExtend_8(t *testing.T) {
 	tree := ukkonen.Tree()
 	root := tree.Root()
 	for _, test := range tests {
-		baseNode := strToNode(root, test.title)
+		baseNode := suffixtree.StrToNode(root, test.title)
 		node := baseNode.NodeFollowing(test.key)
-		edge := baseNode.edgeFollowing(test.key)
+		edge := baseNode.EdgeFollowing(test.key)
 		if node == nil {
 			t.Errorf("%s: Node not found", test.title)
 		}
-		if node.numberOutgoing() != test.numberOutgoing {
-			t.Errorf("%s: got %d outgoing, want %d", test.title, node.numberOutgoing(), test.numberOutgoing)
+		if node.NumberOutgoing() != test.numberOutgoing {
+			t.Errorf("%s: got %d outgoing, want %d", test.title, node.NumberOutgoing(), test.numberOutgoing)
 		}
 		if edge == nil {
 			t.Errorf("%s: Edge not found", test.title)
@@ -377,28 +365,28 @@ func TestBuilderExtend_8(t *testing.T) {
 func TestBuilderExtend_9(t *testing.T) {
 	tests := []struct {
 		title                   string
-		key                     STKey
+		key                     suffixtree.STKey
 		numberOutgoing          int
 		incomingEdgeStartOffset int64
 		incomingEdgeEndOffset   int64
 	}{
-		{"root", STKey(rune('m')), 0, 0, -1},
-		{"root", STKey(rune('i')), 2, 1, 1},
-		{"root", STKey(rune('s')), 2, 2, 2},
-		{"root", STKey(rune('p')), 0, 8, -1},
-		{"s", STKey(rune('s')), 2, 3, 4},
-		{"s", STKey(rune('i')), 2, 4, 4},
-		{"i", STKey(rune('s')), 2, 2, 4},
-		{"i", STKey(rune('p')), 0, 8, -1},
-		{"s,i", STKey(rune('s')), 0, 5, -1},
-		{"s,i", STKey(rune('p')), 0, 8, -1},
-		{"s,s", STKey(rune('s')), 0, 5, -1},
-		{"s,s", STKey(rune('p')), 0, 8, -1},
-		{"i,s", STKey(rune('s')), 0, 5, -1},
-		{"i,s", STKey(rune('p')), 0, 8, -1},
+		{"root", suffixtree.STKey(rune('m')), 0, 0, -1},
+		{"root", suffixtree.STKey(rune('i')), 2, 1, 1},
+		{"root", suffixtree.STKey(rune('s')), 2, 2, 2},
+		{"root", suffixtree.STKey(rune('p')), 0, 8, -1},
+		{"s", suffixtree.STKey(rune('s')), 2, 3, 4},
+		{"s", suffixtree.STKey(rune('i')), 2, 4, 4},
+		{"i", suffixtree.STKey(rune('s')), 2, 2, 4},
+		{"i", suffixtree.STKey(rune('p')), 0, 8, -1},
+		{"s,i", suffixtree.STKey(rune('s')), 0, 5, -1},
+		{"s,i", suffixtree.STKey(rune('p')), 0, 8, -1},
+		{"s,s", suffixtree.STKey(rune('s')), 0, 5, -1},
+		{"s,s", suffixtree.STKey(rune('p')), 0, 8, -1},
+		{"i,s", suffixtree.STKey(rune('s')), 0, 5, -1},
+		{"i,s", suffixtree.STKey(rune('p')), 0, 8, -1},
 	}
-	dataSource := NewStringDataSource("mississippi")
-	ukkonen := NewUkkonen(dataSource)
+	dataSource := suffixtree.NewStringDataSource("mississippi")
+	ukkonen := suffixtree.NewUkkonen(dataSource)
 
 	ukkonen.Extend() // 'm'
 	ukkonen.Extend() // 'i'
@@ -413,14 +401,14 @@ func TestBuilderExtend_9(t *testing.T) {
 	tree := ukkonen.Tree()
 	root := tree.Root()
 	for i, test := range tests {
-		baseNode := strToNode(root, test.title)
+		baseNode := suffixtree.StrToNode(root, test.title)
 		node := baseNode.NodeFollowing(test.key)
-		edge := baseNode.edgeFollowing(test.key)
+		edge := baseNode.EdgeFollowing(test.key)
 		if node == nil {
 			t.Errorf("%d,%s: Node not found", i, test.title)
 		}
-		if node.numberOutgoing() != test.numberOutgoing {
-			t.Errorf("%d,%s: got %d outgoing, want %d", i, test.title, node.numberOutgoing(), test.numberOutgoing)
+		if node.NumberOutgoing() != test.numberOutgoing {
+			t.Errorf("%d,%s: got %d outgoing, want %d", i, test.title, node.NumberOutgoing(), test.numberOutgoing)
 		}
 		if edge == nil {
 			t.Errorf("%d,%s: Edge not found", i, test.title)
@@ -434,28 +422,28 @@ func TestBuilderExtend_9(t *testing.T) {
 func TestBuilderExtend_10(t *testing.T) {
 	tests := []struct {
 		title                   string
-		key                     STKey
+		key                     suffixtree.STKey
 		numberOutgoing          int
 		incomingEdgeStartOffset int64
 		incomingEdgeEndOffset   int64
 	}{
-		{"root", STKey(rune('m')), 0, 0, -1},
-		{"root", STKey(rune('i')), 2, 1, 1},
-		{"root", STKey(rune('s')), 2, 2, 2},
-		{"root", STKey(rune('p')), 0, 8, -1},
-		{"s", STKey(rune('s')), 2, 3, 4},
-		{"s", STKey(rune('i')), 2, 4, 4},
-		{"i", STKey(rune('s')), 2, 2, 4},
-		{"i", STKey(rune('p')), 0, 8, -1},
-		{"s,i", STKey(rune('s')), 0, 5, -1},
-		{"s,i", STKey(rune('p')), 0, 8, -1},
-		{"s,s", STKey(rune('s')), 0, 5, -1},
-		{"s,s", STKey(rune('p')), 0, 8, -1},
-		{"i,s", STKey(rune('s')), 0, 5, -1},
-		{"i,s", STKey(rune('p')), 0, 8, -1},
+		{"root", suffixtree.STKey(rune('m')), 0, 0, -1},
+		{"root", suffixtree.STKey(rune('i')), 2, 1, 1},
+		{"root", suffixtree.STKey(rune('s')), 2, 2, 2},
+		{"root", suffixtree.STKey(rune('p')), 0, 8, -1},
+		{"s", suffixtree.STKey(rune('s')), 2, 3, 4},
+		{"s", suffixtree.STKey(rune('i')), 2, 4, 4},
+		{"i", suffixtree.STKey(rune('s')), 2, 2, 4},
+		{"i", suffixtree.STKey(rune('p')), 0, 8, -1},
+		{"s,i", suffixtree.STKey(rune('s')), 0, 5, -1},
+		{"s,i", suffixtree.STKey(rune('p')), 0, 8, -1},
+		{"s,s", suffixtree.STKey(rune('s')), 0, 5, -1},
+		{"s,s", suffixtree.STKey(rune('p')), 0, 8, -1},
+		{"i,s", suffixtree.STKey(rune('s')), 0, 5, -1},
+		{"i,s", suffixtree.STKey(rune('p')), 0, 8, -1},
 	}
-	dataSource := NewStringDataSource("mississippi")
-	ukkonen := NewUkkonen(dataSource)
+	dataSource := suffixtree.NewStringDataSource("mississippi")
+	ukkonen := suffixtree.NewUkkonen(dataSource)
 
 	ukkonen.Extend() // 'm'
 	ukkonen.Extend() // 'i'
@@ -471,14 +459,14 @@ func TestBuilderExtend_10(t *testing.T) {
 	tree := ukkonen.Tree()
 	root := tree.Root()
 	for i, test := range tests {
-		baseNode := strToNode(root, test.title)
+		baseNode := suffixtree.StrToNode(root, test.title)
 		node := baseNode.NodeFollowing(test.key)
-		edge := baseNode.edgeFollowing(test.key)
+		edge := baseNode.EdgeFollowing(test.key)
 		if node == nil {
 			t.Errorf("%d,%s: Node not found", i, test.title)
 		}
-		if node.numberOutgoing() != test.numberOutgoing {
-			t.Errorf("%d,%s: got %d outgoing, want %d", i, test.title, node.numberOutgoing(), test.numberOutgoing)
+		if node.NumberOutgoing() != test.numberOutgoing {
+			t.Errorf("%d,%s: got %d outgoing, want %d", i, test.title, node.NumberOutgoing(), test.numberOutgoing)
 		}
 		if edge == nil {
 			t.Errorf("%d,%s: Edge not found", i, test.title)
@@ -492,30 +480,30 @@ func TestBuilderExtend_10(t *testing.T) {
 func TestBuilderExtend_11(t *testing.T) {
 	tests := []struct {
 		title                   string
-		key                     STKey
+		key                     suffixtree.STKey
 		numberOutgoing          int
 		incomingEdgeStartOffset int64
 		incomingEdgeEndOffset   int64
 	}{
-		{"root", STKey(rune('m')), 0, 0, -1},
-		{"root", STKey(rune('i')), 2, 1, 1},
-		{"root", STKey(rune('s')), 2, 2, 2},
-		{"root", STKey(rune('p')), 2, 8, 8},
-		{"s", STKey(rune('s')), 2, 3, 4},
-		{"s", STKey(rune('i')), 2, 4, 4},
-		{"i", STKey(rune('s')), 2, 2, 4},
-		{"i", STKey(rune('p')), 0, 8, -1},
-		{"p", STKey(rune('p')), 0, 9, -1},
-		{"p", STKey(rune('i')), 0, 10, -1},
-		{"s,i", STKey(rune('s')), 0, 5, -1},
-		{"s,i", STKey(rune('p')), 0, 8, -1},
-		{"s,s", STKey(rune('s')), 0, 5, -1},
-		{"s,s", STKey(rune('p')), 0, 8, -1},
-		{"i,s", STKey(rune('s')), 0, 5, -1},
-		{"i,s", STKey(rune('p')), 0, 8, -1},
+		{"root", suffixtree.STKey(rune('m')), 0, 0, -1},
+		{"root", suffixtree.STKey(rune('i')), 2, 1, 1},
+		{"root", suffixtree.STKey(rune('s')), 2, 2, 2},
+		{"root", suffixtree.STKey(rune('p')), 2, 8, 8},
+		{"s", suffixtree.STKey(rune('s')), 2, 3, 4},
+		{"s", suffixtree.STKey(rune('i')), 2, 4, 4},
+		{"i", suffixtree.STKey(rune('s')), 2, 2, 4},
+		{"i", suffixtree.STKey(rune('p')), 0, 8, -1},
+		{"p", suffixtree.STKey(rune('p')), 0, 9, -1},
+		{"p", suffixtree.STKey(rune('i')), 0, 10, -1},
+		{"s,i", suffixtree.STKey(rune('s')), 0, 5, -1},
+		{"s,i", suffixtree.STKey(rune('p')), 0, 8, -1},
+		{"s,s", suffixtree.STKey(rune('s')), 0, 5, -1},
+		{"s,s", suffixtree.STKey(rune('p')), 0, 8, -1},
+		{"i,s", suffixtree.STKey(rune('s')), 0, 5, -1},
+		{"i,s", suffixtree.STKey(rune('p')), 0, 8, -1},
 	}
-	dataSource := NewStringDataSource("mississippi")
-	ukkonen := NewUkkonen(dataSource)
+	dataSource := suffixtree.NewStringDataSource("mississippi")
+	ukkonen := suffixtree.NewUkkonen(dataSource)
 
 	ukkonen.Extend() // 'm'
 	ukkonen.Extend() // 'i'
@@ -532,14 +520,14 @@ func TestBuilderExtend_11(t *testing.T) {
 	tree := ukkonen.Tree()
 	root := tree.Root()
 	for i, test := range tests {
-		baseNode := strToNode(root, test.title)
+		baseNode := suffixtree.StrToNode(root, test.title)
 		node := baseNode.NodeFollowing(test.key)
-		edge := baseNode.edgeFollowing(test.key)
+		edge := baseNode.EdgeFollowing(test.key)
 		if node == nil {
 			t.Errorf("%d,%s: Node not found", i, test.title)
 		}
-		if node.numberOutgoing() != test.numberOutgoing {
-			t.Errorf("%d,%s: got %d outgoing, want %d", i, test.title, node.numberOutgoing(), test.numberOutgoing)
+		if node.NumberOutgoing() != test.numberOutgoing {
+			t.Errorf("%d,%s: got %d outgoing, want %d", i, test.title, node.NumberOutgoing(), test.numberOutgoing)
 		}
 		if edge == nil {
 			t.Errorf("%d,%s: Edge not found", i, test.title)
@@ -553,30 +541,30 @@ func TestBuilderExtend_11(t *testing.T) {
 func TestBuilderExtend_12(t *testing.T) {
 	tests := []struct {
 		title                   string
-		key                     STKey
+		key                     suffixtree.STKey
 		numberOutgoing          int
 		incomingEdgeStartOffset int64
 		incomingEdgeEndOffset   int64
 	}{
-		{"root", STKey(rune('m')), 0, 0, -1},
-		{"root", STKey(rune('i')), 2, 1, 1},
-		{"root", STKey(rune('s')), 2, 2, 2},
-		{"root", STKey(rune('p')), 2, 8, 8},
-		{"s", STKey(rune('s')), 2, 3, 4},
-		{"s", STKey(rune('i')), 2, 4, 4},
-		{"i", STKey(rune('s')), 2, 2, 4},
-		{"i", STKey(rune('p')), 0, 8, -1},
-		{"p", STKey(rune('p')), 0, 9, -1},
-		{"p", STKey(rune('i')), 0, 10, -1},
-		{"s,i", STKey(rune('s')), 0, 5, -1},
-		{"s,i", STKey(rune('p')), 0, 8, -1},
-		{"s,s", STKey(rune('s')), 0, 5, -1},
-		{"s,s", STKey(rune('p')), 0, 8, -1},
-		{"i,s", STKey(rune('s')), 0, 5, -1},
-		{"i,s", STKey(rune('p')), 0, 8, -1},
+		{"root", suffixtree.STKey(rune('m')), 0, 0, -1},
+		{"root", suffixtree.STKey(rune('i')), 2, 1, 1},
+		{"root", suffixtree.STKey(rune('s')), 2, 2, 2},
+		{"root", suffixtree.STKey(rune('p')), 2, 8, 8},
+		{"s", suffixtree.STKey(rune('s')), 2, 3, 4},
+		{"s", suffixtree.STKey(rune('i')), 2, 4, 4},
+		{"i", suffixtree.STKey(rune('s')), 2, 2, 4},
+		{"i", suffixtree.STKey(rune('p')), 0, 8, -1},
+		{"p", suffixtree.STKey(rune('p')), 0, 9, -1},
+		{"p", suffixtree.STKey(rune('i')), 0, 10, -1},
+		{"s,i", suffixtree.STKey(rune('s')), 0, 5, -1},
+		{"s,i", suffixtree.STKey(rune('p')), 0, 8, -1},
+		{"s,s", suffixtree.STKey(rune('s')), 0, 5, -1},
+		{"s,s", suffixtree.STKey(rune('p')), 0, 8, -1},
+		{"i,s", suffixtree.STKey(rune('s')), 0, 5, -1},
+		{"i,s", suffixtree.STKey(rune('p')), 0, 8, -1},
 	}
-	dataSource := NewStringDataSource("mississippi")
-	ukkonen := NewUkkonen(dataSource)
+	dataSource := suffixtree.NewStringDataSource("mississippi")
+	ukkonen := suffixtree.NewUkkonen(dataSource)
 
 	ukkonen.Extend() // 'm'
 	ukkonen.Extend() // 'i'
@@ -596,14 +584,14 @@ func TestBuilderExtend_12(t *testing.T) {
 	tree := ukkonen.Tree()
 	root := tree.Root()
 	for i, test := range tests {
-		baseNode := strToNode(root, test.title)
+		baseNode := suffixtree.StrToNode(root, test.title)
 		node := baseNode.NodeFollowing(test.key)
-		edge := baseNode.edgeFollowing(test.key)
+		edge := baseNode.EdgeFollowing(test.key)
 		if node == nil {
 			t.Errorf("%d,%s: Node not found", i, test.title)
 		}
-		if node.numberOutgoing() != test.numberOutgoing {
-			t.Errorf("%d,%s: got %d outgoing, want %d", i, test.title, node.numberOutgoing(), test.numberOutgoing)
+		if node.NumberOutgoing() != test.numberOutgoing {
+			t.Errorf("%d,%s: got %d outgoing, want %d", i, test.title, node.NumberOutgoing(), test.numberOutgoing)
 		}
 		if edge == nil {
 			t.Errorf("%d,%s: Edge not found", i, test.title)

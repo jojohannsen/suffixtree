@@ -23,19 +23,19 @@ type Node interface {
 	setIncoming(node Node, edge *Edge)
 
 	// suffix link
-	suffixLink() Node
-	setSuffixLink(Node)
+	SuffixLink() Node
+	SetSuffixLink(Node)
 
 	// child Nodes and outgoing Edges
-	addOutgoingEdgeNode(key STKey, edge *Edge, node Node)
+	AddOutgoingEdgeNode(key STKey, edge *Edge, node Node)
 	outgoingEdgeNode(key STKey) (*Edge, Node)
 	addLeafEdgeNode(key STKey, offset int64) (*Edge, Node)
-	edgeFollowing(key STKey) *Edge
+	EdgeFollowing(key STKey) *Edge
 	NodeFollowing(key STKey) Node
 	OutgoingNodes() []Node
 	outgoingNodeMap() map[STKey]Node
 	OutgoingEdgeMap() map[STKey]*Edge
-	numberOutgoing() int
+	NumberOutgoing() int
 }
 
 func printPathToNode(node Node, dataSource DataSource) {
@@ -82,7 +82,7 @@ type hasOutgoing struct {
 	nodes map[STKey]Node
 }
 
-func (outgoing *hasOutgoing) edgeFollowing(key STKey) *Edge {
+func (outgoing *hasOutgoing) EdgeFollowing(key STKey) *Edge {
 	return outgoing.edges[key]
 }
 
@@ -90,7 +90,7 @@ func (outgoing *hasOutgoing) NodeFollowing(key STKey) Node {
 	return outgoing.nodes[key]
 }
 
-func (outgoing *hasOutgoing) addOutgoingEdgeNode(key STKey, edge *Edge, node Node) {
+func (outgoing *hasOutgoing) AddOutgoingEdgeNode(key STKey, edge *Edge, node Node) {
 	outgoing.edges[key] = edge
 	outgoing.nodes[key] = node
 }
@@ -119,7 +119,7 @@ func (outgoing *hasOutgoing) outgoingEdgeNode(key STKey) (*Edge, Node) {
 	return outgoing.edges[key], outgoing.nodes[key]
 }
 
-func (outgoing *hasOutgoing) numberOutgoing() int {
+func (outgoing *hasOutgoing) NumberOutgoing() int {
 	return len(outgoing.edges)
 }
 
@@ -133,11 +133,11 @@ func (outgoing *hasOutgoing) SuffixOffset() int64 {
 
 type noOutgoing struct{}
 
-func (node *noOutgoing) edgeFollowing(key STKey) *Edge {
+func (node *noOutgoing) EdgeFollowing(key STKey) *Edge {
 	panic("Leaf has no children")
 }
 
-func (node *noOutgoing) addOutgoingEdgeNode(key STKey, edge *Edge, n Node) {
+func (node *noOutgoing) AddOutgoingEdgeNode(key STKey, edge *Edge, n Node) {
 	panic("Leaf has no outgoing edges")
 }
 
@@ -153,7 +153,7 @@ func (node *noOutgoing) removeEdgeFollowing(key STKey) {
 	panic("Leaf has no children")
 }
 
-func (node *noOutgoing) numberOutgoing() int {
+func (node *noOutgoing) NumberOutgoing() int {
 	return 0
 }
 
@@ -227,21 +227,21 @@ type hasSuffixLink struct {
 	_suffixLink Node
 }
 
-func (internal *hasSuffixLink) suffixLink() Node {
+func (internal *hasSuffixLink) SuffixLink() Node {
 	return internal._suffixLink
 }
 
-func (internal *hasSuffixLink) setSuffixLink(slink Node) {
+func (internal *hasSuffixLink) SetSuffixLink(slink Node) {
 	internal._suffixLink = slink
 }
 
 type noSuffixLink struct{}
 
-func (nsl *noSuffixLink) suffixLink() Node {
+func (nsl *noSuffixLink) SuffixLink() Node {
 	return nil
 }
 
-func (nsl *noSuffixLink) setSuffixLink(node Node) {
+func (nsl *noSuffixLink) SetSuffixLink(node Node) {
 	panic("Node does NOT have a suffix link")
 }
 
@@ -275,7 +275,7 @@ func (root *rootNode) isInternal() bool {
 
 func (root *rootNode) addLeafEdgeNode(key STKey, offset int64) (*Edge, Node) {
 	edge, node := NewLeafEdgeNode(root, offset)
-	root.addOutgoingEdgeNode(key, edge, node)
+	root.AddOutgoingEdgeNode(key, edge, node)
 	return edge, node
 }
 
@@ -302,8 +302,8 @@ func (internal *internalNode) String() string {
 	}
 	result = fmt.Sprintf("%s)", result)
 	suffixLink := "nil"
-	if internal.suffixLink() != nil {
-		suffixLink = fmt.Sprintf("%s", internal.suffixLink())
+	if internal.SuffixLink() != nil {
+		suffixLink = fmt.Sprintf("%s", internal.SuffixLink())
 	}
 	result = fmt.Sprintf("%s, suffixLink=%s", result, suffixLink)
 	return result
@@ -315,7 +315,7 @@ func (internal *internalNode) isInternal() bool {
 
 func (internal *internalNode) addLeafEdgeNode(key STKey, offset int64) (*Edge, Node) {
 	edge, node := NewLeafEdgeNode(internal, offset)
-	internal.addOutgoingEdgeNode(key, edge, node)
+	internal.AddOutgoingEdgeNode(key, edge, node)
 	return edge, node
 }
 

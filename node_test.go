@@ -3,33 +3,35 @@ package suffixtree
 import (
 	"strconv"
 	"testing"
+
+	"github.com/jojohannsen/suffixtree"
 )
 
 func TestRootNode(t *testing.T) {
-	var root Node = NewRootNode()
+	var root suffixtree.Node = suffixtree.NewRootNode()
 	if root == nil {
 		t.Error("NewRootNode returned nil")
 	}
 	if root.IncomingEdge() != nil {
 		t.Error("root has unexpected parent")
 	}
-	if root.edgeFollowing(0) != nil {
+	if root.EdgeFollowing(0) != nil {
 		t.Error("unexpected children")
 	}
-	if root.suffixLink() != nil {
+	if root.SuffixLink() != nil {
 		t.Error("Unexpected suffix link")
 	}
 }
 
 func TestRootOutgoingEdge(t *testing.T) {
-	root := NewRootNode()
-	edge := NewEdge(0, 3)
-	root.addOutgoingEdgeNode(1000, edge, nil)
-	testEdge := root.edgeFollowing(1000)
+	root := suffixtree.NewRootNode()
+	edge := suffixtree.NewEdge(0, 3)
+	root.AddOutgoingEdgeNode(1000, edge, nil)
+	testEdge := root.EdgeFollowing(1000)
 	if testEdge != edge {
 		t.Error("Did not get edge just added")
 	}
-	testEdge = root.edgeFollowing(1001)
+	testEdge = root.EdgeFollowing(1001)
 	if testEdge != nil {
 		t.Error("Found edge where none expected")
 	}
@@ -39,8 +41,8 @@ func TestRootPanic1(t *testing.T) {
 	defer func() {
 		recover()
 	}()
-	root := NewRootNode()
-	root.setSuffixLink(nil)
+	root := suffixtree.NewRootNode()
+	root.SetSuffixLink(nil)
 	t.Errorf("The code did not panic")
 }
 
@@ -48,20 +50,20 @@ func TestRootChildren(t *testing.T) {
 	var rootTests = []struct {
 		startOffset int64
 		endOffset   int64
-		firstValue  STKey
+		firstValue  suffixtree.STKey
 	}{
 		{0, 3, 1001},
 		{1, 3, 1002},
 		{2, 3, 1003},
 		{3, 3, 1004},
 	}
-	root := NewRootNode()
+	root := suffixtree.NewRootNode()
 	for _, test := range rootTests {
-		edge := NewEdge(test.startOffset, test.endOffset)
-		root.addOutgoingEdgeNode(test.firstValue, edge, nil)
+		edge := suffixtree.NewEdge(test.startOffset, test.endOffset)
+		root.AddOutgoingEdgeNode(test.firstValue, edge, nil)
 	}
 	for _, test := range rootTests {
-		testEdge := root.edgeFollowing(test.firstValue)
+		testEdge := root.EdgeFollowing(test.firstValue)
 		if testEdge.StartOffset != test.startOffset {
 			t.Error("Edge start offset, got " + strconv.FormatInt(testEdge.StartOffset, 10) + ", want " + strconv.FormatInt(test.startOffset, 10))
 		}
@@ -69,7 +71,7 @@ func TestRootChildren(t *testing.T) {
 			t.Error("Edge end offset, got " + strconv.FormatInt(testEdge.EndOffset, 10) + ", want " + strconv.FormatInt(test.endOffset, 10))
 		}
 	}
-	testEdge := root.edgeFollowing(111111)
+	testEdge := root.EdgeFollowing(111111)
 	if testEdge != nil {
 		t.Error("Found edge where none expected")
 	}
@@ -79,36 +81,36 @@ func TestInternalChildren(t *testing.T) {
 	var internalTests = []struct {
 		startOffset int64
 		endOffset   int64
-		firstValue  STKey
+		firstValue  suffixtree.STKey
 	}{
 		{0, 3, 1001},
 		{1, 3, 1002},
 		{2, 3, 1003},
 		{3, 3, 1004},
 	}
-	root := NewRootNode()
+	root := suffixtree.NewRootNode()
 	for _, test := range internalTests {
-		edge := NewEdge(test.startOffset, test.endOffset)
-		internal := NewInternalNode(root, edge)
+		edge := suffixtree.NewEdge(test.startOffset, test.endOffset)
+		internal := suffixtree.NewInternalNode(root, edge)
 		if internal.IncomingEdge() != edge {
 			t.Error("Internal parent not found")
 		}
-		internalEdge := NewEdge(test.startOffset, test.endOffset)
-		root.addOutgoingEdgeNode(test.firstValue, edge, nil)
-		internal.addOutgoingEdgeNode(2000, internalEdge, nil)
-		if internal.suffixLink() != nil {
+		internalEdge := suffixtree.NewEdge(test.startOffset, test.endOffset)
+		root.AddOutgoingEdgeNode(test.firstValue, edge, nil)
+		internal.AddOutgoingEdgeNode(2000, internalEdge, nil)
+		if internal.SuffixLink() != nil {
 			t.Error("new Internal Node had a suffix link")
 		}
-		if internal.edgeFollowing(2000) != internalEdge {
+		if internal.EdgeFollowing(2000) != internalEdge {
 			t.Error("internal edge follow failed")
 		}
-		internal.setSuffixLink(root)
-		if internal.suffixLink() != root {
-			t.Error("InternalNode setSuffixLink failed")
+		internal.SetSuffixLink(root)
+		if internal.SuffixLink() != root {
+			t.Error("InternalNode SetSuffixLink failed")
 		}
 	}
 	for _, test := range internalTests {
-		testEdge := root.edgeFollowing(test.firstValue)
+		testEdge := root.EdgeFollowing(test.firstValue)
 		if testEdge.StartOffset != test.startOffset {
 			t.Error("Edge start offset, got " + strconv.FormatInt(testEdge.StartOffset, 10) + ", want " + strconv.FormatInt(test.startOffset, 10))
 		}
@@ -116,7 +118,7 @@ func TestInternalChildren(t *testing.T) {
 			t.Error("Edge end offset, got " + strconv.FormatInt(testEdge.EndOffset, 10) + ", want " + strconv.FormatInt(test.endOffset, 10))
 		}
 	}
-	testEdge := root.edgeFollowing(111111)
+	testEdge := root.EdgeFollowing(111111)
 	if testEdge != nil {
 		t.Error("Found edge where none expected")
 	}
@@ -127,9 +129,9 @@ func TestLeafOutgoingFollowing(t *testing.T) {
 		recover()
 	}()
 
-	root := NewRootNode()
-	edge, leaf := NewLeafEdgeNode(root, 0)
-	leaf.addOutgoingEdgeNode(1000, edge, leaf)
+	root := suffixtree.NewRootNode()
+	edge, leaf := suffixtree.NewLeafEdgeNode(root, 0)
+	leaf.AddOutgoingEdgeNode(1000, edge, leaf)
 	t.Errorf("The code did not panic")
 }
 
@@ -138,9 +140,9 @@ func TestLeafEdgeFollowingPanic(t *testing.T) {
 		recover()
 	}()
 
-	root := NewRootNode()
-	_, leaf := NewLeafEdgeNode(root, 0)
-	leaf.edgeFollowing(1000)
+	root := suffixtree.NewRootNode()
+	_, leaf := suffixtree.NewLeafEdgeNode(root, 0)
+	leaf.EdgeFollowing(1000)
 	t.Errorf("The code did not panic")
 }
 
@@ -149,9 +151,9 @@ func TestLeafSuffixLinkPanic(t *testing.T) {
 		recover()
 	}()
 
-	root := NewRootNode()
-	_, leaf := NewLeafEdgeNode(root, 0)
-	leaf.setSuffixLink(nil)
+	root := suffixtree.NewRootNode()
+	_, leaf := suffixtree.NewLeafEdgeNode(root, 0)
+	leaf.SetSuffixLink(nil)
 	t.Errorf("The code did not panic")
 }
 
@@ -159,23 +161,23 @@ func TestRootLeaf(t *testing.T) {
 	var rootLeafTests = []struct {
 		startOffset int64
 		endOffset   int64
-		firstValue  STKey
+		firstValue  suffixtree.STKey
 	}{
 		{0, -1, 1001},
 		{1, -1, 1002},
 		{2, -1, 1003},
 		{3, -1, 1004},
 	}
-	root := NewRootNode()
+	root := suffixtree.NewRootNode()
 	for _, test := range rootLeafTests {
-		edge := NewEdge(test.startOffset, test.endOffset)
-		edge, leaf := NewLeafEdgeNode(root, test.startOffset)
+		edge := suffixtree.NewEdge(test.startOffset, test.endOffset)
+		edge, leaf := suffixtree.NewLeafEdgeNode(root, test.startOffset)
 		if leaf.IncomingEdge() != edge {
 			t.Error("Leaf parent was NOT edge")
 		}
-		if leaf.suffixLink() != nil {
+		if leaf.SuffixLink() != nil {
 			t.Error("Leaf suffixLink was NOT nil")
 		}
-		root.addOutgoingEdgeNode(test.firstValue, edge, leaf)
+		root.AddOutgoingEdgeNode(test.firstValue, edge, leaf)
 	}
 }

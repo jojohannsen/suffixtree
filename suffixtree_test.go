@@ -5,26 +5,27 @@ import (
 	"math/rand"
 	"reflect"
 	"testing"
+	"github.com/jojohannsen/suffixtree"
 )
 
 func TestX(t *testing.T) {
 	tests := []struct {
 		title                   string
-		key                     STKey
+		key                     suffixtree.STKey
 		numberOutgoing          int
 		incomingEdgeStartOffset int64
 		incomingEdgeEndOffset   int64
 		suffixOffset            int64
 	}{
-		{"root", STKey(rune('m')), 0, 0, -1, 0},
-		{"root", STKey(rune('i')), 0, 1, -1, 1},
-		{"root", STKey(rune('s')), 2, 2, 2, -1},
-		{"root", STKey(rune('$')), 0, 4, -1, 4},
-		{"s", STKey(rune('s')), 0, 3, -1, 2},
-		{"s", STKey(rune('$')), 0, 4, -1, 3},
+		{"root", suffixtree.STKey(rune('m')), 0, 0, -1, 0},
+		{"root", suffixtree.STKey(rune('i')), 0, 1, -1, 1},
+		{"root", suffixtree.STKey(rune('s')), 2, 2, 2, -1},
+		{"root", suffixtree.STKey(rune('$')), 0, 4, -1, 4},
+		{"s", suffixtree.STKey(rune('s')), 0, 3, -1, 2},
+		{"s", suffixtree.STKey(rune('$')), 0, 4, -1, 3},
 	}
-	dataSource := NewStringDataSource("miss$")
-	ukkonen := NewUkkonen(dataSource)
+	dataSource := suffixtree.NewStringDataSource("miss$")
+	ukkonen := suffixtree.NewUkkonen(dataSource)
 
 	ukkonen.Extend() // 'm'
 	ukkonen.Extend() // 'i'
@@ -35,14 +36,14 @@ func TestX(t *testing.T) {
 	root := tree.Root()
 
 	for _, test := range tests {
-		baseNode := strToNode(root, test.title)
+		baseNode := suffixtree.StrToNode(root, test.title)
 		node := baseNode.NodeFollowing(test.key)
-		edge := baseNode.edgeFollowing(test.key)
+		edge := baseNode.EdgeFollowing(test.key)
 		if node == nil {
 			t.Errorf("%s: Node not found", test.title)
 		}
-		if node.numberOutgoing() != test.numberOutgoing {
-			t.Errorf("%s: got %d outgoing, want %d", test.title, node.numberOutgoing(), test.numberOutgoing)
+		if node.NumberOutgoing() != test.numberOutgoing {
+			t.Errorf("%s: got %d outgoing, want %d", test.title, node.NumberOutgoing(), test.numberOutgoing)
 		}
 		if edge == nil {
 			t.Errorf("%s: Edge not found", test.title)
@@ -59,13 +60,13 @@ func TestX(t *testing.T) {
 }
 
 func TestSuffixTree(t *testing.T) {
-	dataSource := NewStringDataSource("mississippi$")
-	ukkonen := NewUkkonen(dataSource)
-	ukkonen.drainDataSource()
+	dataSource := suffixtree.NewStringDataSource("mississippi$")
+	ukkonen := suffixtree.NewUkkonen(dataSource)
+	ukkonen.DrainDataSource()
 	st := ukkonen.Tree()
-	searcher := NewSearcher(st.Root(), dataSource)
-	m := []STKey{STKey(rune('m'))}
-	result := searcher.find(m)
+	searcher := suffixtree.NewSearcher(st.Root(), dataSource)
+	m := []suffixtree.STKey{suffixtree.STKey(rune('m'))}
+	result := searcher.Find(m)
 	if len(result) != 1 {
 		t.Error("Did not find 'm'")
 	}
@@ -73,26 +74,26 @@ func TestSuffixTree(t *testing.T) {
 	if !reflect.DeepEqual(result, expectedM) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedM)
 	}
-	i := []STKey{STKey(rune('i'))}
-	result = searcher.find(i)
+	i := []suffixtree.STKey{suffixtree.STKey(rune('i'))}
+	result = searcher.Find(i)
 	expectedI := []int64{1, 4, 7, 10}
 	if !reflect.DeepEqual(result, expectedI) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedI)
 	}
-	s := []STKey{STKey(rune('s'))}
-	result = searcher.find(s)
+	s := []suffixtree.STKey{suffixtree.STKey(rune('s'))}
+	result = searcher.Find(s)
 	expectedS := []int64{2, 3, 5, 6}
 	if !reflect.DeepEqual(result, expectedS) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedS)
 	}
-	p := []STKey{STKey(rune('p'))}
-	result = searcher.find(p)
+	p := []suffixtree.STKey{suffixtree.STKey(rune('p'))}
+	result = searcher.Find(p)
 	expectedP := []int64{8, 9}
 	if !reflect.DeepEqual(result, expectedP) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedP)
 	}
-	dollar := []STKey{STKey(rune('$'))}
-	result = searcher.find(dollar)
+	dollar := []suffixtree.STKey{suffixtree.STKey(rune('$'))}
+	result = searcher.Find(dollar)
 	expectedDollar := []int64{11}
 	if !reflect.DeepEqual(result, expectedDollar) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedDollar)
@@ -100,13 +101,13 @@ func TestSuffixTree(t *testing.T) {
 }
 
 func TestSuffixTree2(t *testing.T) {
-	dataSource := NewStringDataSource("mississippi$")
-	ukkonen := NewUkkonen(dataSource)
-	ukkonen.drainDataSource()
+	dataSource := suffixtree.NewStringDataSource("mississippi$")
+	ukkonen := suffixtree.NewUkkonen(dataSource)
+	ukkonen.DrainDataSource()
 	st := ukkonen.Tree()
-	searcher := NewSearcher(st.Root(), dataSource)
-	mi := []STKey{STKey(rune('m')), STKey(rune('i'))}
-	result := searcher.find(mi)
+	searcher := suffixtree.NewSearcher(st.Root(), dataSource)
+	mi := []suffixtree.STKey{suffixtree.STKey(rune('m')), suffixtree.STKey(rune('i'))}
+	result := searcher.Find(mi)
 	if len(result) != 1 {
 		t.Error("Did not find 'mi'")
 	}
@@ -114,51 +115,51 @@ func TestSuffixTree2(t *testing.T) {
 	if !reflect.DeepEqual(result, expectedMI) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedMI)
 	}
-	is := []STKey{STKey(rune('i')), STKey(rune('s'))}
-	result = searcher.find(is)
+	is := []suffixtree.STKey{suffixtree.STKey(rune('i')), suffixtree.STKey(rune('s'))}
+	result = searcher.Find(is)
 	expectedIS := []int64{1, 4}
 	if !reflect.DeepEqual(result, expectedIS) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedIS)
 	}
-	ip := []STKey{STKey(rune('i')), STKey(rune('p'))}
-	result = searcher.find(ip)
+	ip := []suffixtree.STKey{suffixtree.STKey(rune('i')), suffixtree.STKey(rune('p'))}
+	result = searcher.Find(ip)
 	expectedIP := []int64{7}
 	if !reflect.DeepEqual(result, expectedIP) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedIP)
 	}
-	idollar := []STKey{STKey(rune('i')), STKey(rune('$'))}
-	result = searcher.find(idollar)
+	idollar := []suffixtree.STKey{suffixtree.STKey(rune('i')), suffixtree.STKey(rune('$'))}
+	result = searcher.Find(idollar)
 	expectedIdollar := []int64{10}
 	if !reflect.DeepEqual(result, expectedIdollar) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedIdollar)
 	}
-	ss := []STKey{STKey(rune('s')), STKey(rune('s'))}
-	result = searcher.find(ss)
+	ss := []suffixtree.STKey{suffixtree.STKey(rune('s')), suffixtree.STKey(rune('s'))}
+	result = searcher.Find(ss)
 	expectedSS := []int64{2, 5}
 	if !reflect.DeepEqual(result, expectedSS) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedSS)
 	}
-	si := []STKey{STKey(rune('s')), STKey(rune('i'))}
-	result = searcher.find(si)
+	si := []suffixtree.STKey{suffixtree.STKey(rune('s')), suffixtree.STKey(rune('i'))}
+	result = searcher.Find(si)
 	expectedSI := []int64{3, 6}
 	if !reflect.DeepEqual(result, expectedSI) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedSI)
 	}
 
-	pp := []STKey{STKey(rune('p')), STKey(rune('p'))}
-	result = searcher.find(pp)
+	pp := []suffixtree.STKey{suffixtree.STKey(rune('p')), suffixtree.STKey(rune('p'))}
+	result = searcher.Find(pp)
 	expectedPP := []int64{8}
 	if !reflect.DeepEqual(result, expectedPP) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedPP)
 	}
-	pi := []STKey{STKey(rune('p')), STKey(rune('i'))}
-	result = searcher.find(pi)
+	pi := []suffixtree.STKey{suffixtree.STKey(rune('p')), suffixtree.STKey(rune('i'))}
+	result = searcher.Find(pi)
 	expectedPI := []int64{9}
 	if !reflect.DeepEqual(result, expectedPI) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedPI)
 	}
-	dollar := []STKey{STKey(rune('$'))}
-	result = searcher.find(dollar)
+	dollar := []suffixtree.STKey{suffixtree.STKey(rune('$'))}
+	result = searcher.Find(dollar)
 	expectedDollar := []int64{11}
 	if !reflect.DeepEqual(result, expectedDollar) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedDollar)
@@ -166,13 +167,13 @@ func TestSuffixTree2(t *testing.T) {
 }
 
 func TestSuffixTree3(t *testing.T) {
-	dataSource := NewStringDataSource("mississippi$")
-	ukkonen := NewUkkonen(dataSource)
-	ukkonen.drainDataSource()
+	dataSource := suffixtree.NewStringDataSource("mississippi$")
+	ukkonen := suffixtree.NewUkkonen(dataSource)
+	ukkonen.DrainDataSource()
 	st := ukkonen.Tree()
-	searcher := NewSearcher(st.Root(), dataSource)
-	mis := []STKey{STKey(rune('m')), STKey(rune('i')), STKey(rune('s'))}
-	result := searcher.find(mis)
+	searcher := suffixtree.NewSearcher(st.Root(), dataSource)
+	mis := []suffixtree.STKey{suffixtree.STKey(rune('m')), suffixtree.STKey(rune('i')), suffixtree.STKey(rune('s'))}
+	result := searcher.Find(mis)
 	if len(result) != 1 {
 		t.Error("Did not find 'mis'")
 	}
@@ -180,51 +181,51 @@ func TestSuffixTree3(t *testing.T) {
 	if !reflect.DeepEqual(result, expectedMIS) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedMIS)
 	}
-	iss := []STKey{STKey(rune('i')), STKey(rune('s')), STKey(rune('s'))}
-	result = searcher.find(iss)
+	iss := []suffixtree.STKey{suffixtree.STKey(rune('i')), suffixtree.STKey(rune('s')), suffixtree.STKey(rune('s'))}
+	result = searcher.Find(iss)
 	expectedISS := []int64{1, 4}
 	if !reflect.DeepEqual(result, expectedISS) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedISS)
 	}
-	ipp := []STKey{STKey(rune('i')), STKey(rune('p')), STKey(rune('p'))}
-	result = searcher.find(ipp)
+	ipp := []suffixtree.STKey{suffixtree.STKey(rune('i')), suffixtree.STKey(rune('p')), suffixtree.STKey(rune('p'))}
+	result = searcher.Find(ipp)
 	expectedIPP := []int64{7}
 	if !reflect.DeepEqual(result, expectedIPP) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedIPP)
 	}
-	ssi := []STKey{STKey(rune('s')), STKey(rune('s')), STKey(rune('i'))}
-	result = searcher.find(ssi)
+	ssi := []suffixtree.STKey{suffixtree.STKey(rune('s')), suffixtree.STKey(rune('s')), suffixtree.STKey(rune('i'))}
+	result = searcher.Find(ssi)
 	expectedSSI := []int64{2, 5}
 	if !reflect.DeepEqual(result, expectedSSI) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedSSI)
 	}
-	sis := []STKey{STKey(rune('s')), STKey(rune('i')), STKey(rune('s'))}
-	result = searcher.find(sis)
+	sis := []suffixtree.STKey{suffixtree.STKey(rune('s')), suffixtree.STKey(rune('i')), suffixtree.STKey(rune('s'))}
+	result = searcher.Find(sis)
 	expectedSIS := []int64{3}
 	if !reflect.DeepEqual(result, expectedSIS) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedSIS)
 	}
-	sip := []STKey{STKey(rune('s')), STKey(rune('i')), STKey(rune('p'))}
-	result = searcher.find(sip)
+	sip := []suffixtree.STKey{suffixtree.STKey(rune('s')), suffixtree.STKey(rune('i')), suffixtree.STKey(rune('p'))}
+	result = searcher.Find(sip)
 	expectedSIP := []int64{6}
 	if !reflect.DeepEqual(result, expectedSIP) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedSIP)
 	}
 
-	ppi := []STKey{STKey(rune('p')), STKey(rune('p')), STKey(rune('i'))}
-	result = searcher.find(ppi)
+	ppi := []suffixtree.STKey{suffixtree.STKey(rune('p')), suffixtree.STKey(rune('p')), suffixtree.STKey(rune('i'))}
+	result = searcher.Find(ppi)
 	expectedPPI := []int64{8}
 	if !reflect.DeepEqual(result, expectedPPI) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedPPI)
 	}
-	piDollar := []STKey{STKey(rune('p')), STKey(rune('i')), STKey(rune('$'))}
-	result = searcher.find(piDollar)
+	piDollar := []suffixtree.STKey{suffixtree.STKey(rune('p')), suffixtree.STKey(rune('i')), suffixtree.STKey(rune('$'))}
+	result = searcher.Find(piDollar)
 	expectedPIdollar := []int64{9}
 	if !reflect.DeepEqual(result, expectedPIdollar) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedPIdollar)
 	}
-	dollar := []STKey{STKey(rune('$'))}
-	result = searcher.find(dollar)
+	dollar := []suffixtree.STKey{suffixtree.STKey(rune('$'))}
+	result = searcher.Find(dollar)
 	expectedDollar := []int64{11}
 	if !reflect.DeepEqual(result, expectedDollar) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedDollar)
@@ -232,13 +233,13 @@ func TestSuffixTree3(t *testing.T) {
 }
 
 func TestSuffixTree4(t *testing.T) {
-	dataSource := NewStringDataSource("mississippi$")
-	ukkonen := NewUkkonen(dataSource)
-	ukkonen.drainDataSource()
+	dataSource := suffixtree.NewStringDataSource("mississippi$")
+	ukkonen := suffixtree.NewUkkonen(dataSource)
+	ukkonen.DrainDataSource()
 	st := ukkonen.Tree()
-	searcher := NewSearcher(st.Root(), dataSource)
-	miss := []STKey{STKey(rune('m')), STKey(rune('i')), STKey(rune('s')), STKey(rune('s'))}
-	result := searcher.find(miss)
+	searcher := suffixtree.NewSearcher(st.Root(), dataSource)
+	miss := []suffixtree.STKey{suffixtree.STKey(rune('m')), suffixtree.STKey(rune('i')), suffixtree.STKey(rune('s')), suffixtree.STKey(rune('s'))}
+	result := searcher.Find(miss)
 	if len(result) != 1 {
 		t.Error("Did not find 'miss'")
 	}
@@ -246,45 +247,45 @@ func TestSuffixTree4(t *testing.T) {
 	if !reflect.DeepEqual(result, expectedMISS) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedMISS)
 	}
-	issi := []STKey{STKey(rune('i')), STKey(rune('s')), STKey(rune('s')), STKey(rune('i'))}
-	result = searcher.find(issi)
+	issi := []suffixtree.STKey{suffixtree.STKey(rune('i')), suffixtree.STKey(rune('s')), suffixtree.STKey(rune('s')), suffixtree.STKey(rune('i'))}
+	result = searcher.Find(issi)
 	expectedISSI := []int64{1, 4}
 	if !reflect.DeepEqual(result, expectedISSI) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedISSI)
 	}
-	ippi := []STKey{STKey(rune('i')), STKey(rune('p')), STKey(rune('p')), STKey(rune('i'))}
-	result = searcher.find(ippi)
+	ippi := []suffixtree.STKey{suffixtree.STKey(rune('i')), suffixtree.STKey(rune('p')), suffixtree.STKey(rune('p')), suffixtree.STKey(rune('i'))}
+	result = searcher.Find(ippi)
 	expectedIPPI := []int64{7}
 	if !reflect.DeepEqual(result, expectedIPPI) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedIPPI)
 	}
-	ssis := []STKey{STKey(rune('s')), STKey(rune('s')), STKey(rune('i')), STKey(rune('s'))}
-	result = searcher.find(ssis)
+	ssis := []suffixtree.STKey{suffixtree.STKey(rune('s')), suffixtree.STKey(rune('s')), suffixtree.STKey(rune('i')), suffixtree.STKey(rune('s'))}
+	result = searcher.Find(ssis)
 	expectedSSIS := []int64{2}
 	if !reflect.DeepEqual(result, expectedSSIS) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedSSIS)
 	}
-	ssip := []STKey{STKey(rune('s')), STKey(rune('s')), STKey(rune('i')), STKey(rune('p'))}
-	result = searcher.find(ssip)
+	ssip := []suffixtree.STKey{suffixtree.STKey(rune('s')), suffixtree.STKey(rune('s')), suffixtree.STKey(rune('i')), suffixtree.STKey(rune('p'))}
+	result = searcher.Find(ssip)
 	expectedSSIP := []int64{5}
 	if !reflect.DeepEqual(result, expectedSSIP) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedSSIP)
 	}
-	siss := []STKey{STKey(rune('s')), STKey(rune('i')), STKey(rune('s')), STKey(rune('s'))}
-	result = searcher.find(siss)
+	siss := []suffixtree.STKey{suffixtree.STKey(rune('s')), suffixtree.STKey(rune('i')), suffixtree.STKey(rune('s')), suffixtree.STKey(rune('s'))}
+	result = searcher.Find(siss)
 	expectedSISS := []int64{3}
 	if !reflect.DeepEqual(result, expectedSISS) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedSISS)
 	}
-	sipp := []STKey{STKey(rune('s')), STKey(rune('i')), STKey(rune('p')), STKey(rune('p'))}
-	result = searcher.find(sipp)
+	sipp := []suffixtree.STKey{suffixtree.STKey(rune('s')), suffixtree.STKey(rune('i')), suffixtree.STKey(rune('p')), suffixtree.STKey(rune('p'))}
+	result = searcher.Find(sipp)
 	expectedSIPP := []int64{6}
 	if !reflect.DeepEqual(result, expectedSIPP) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedSIPP)
 	}
 
-	ppiDollar := []STKey{STKey(rune('p')), STKey(rune('p')), STKey(rune('i')), STKey(rune('$'))}
-	result = searcher.find(ppiDollar)
+	ppiDollar := []suffixtree.STKey{suffixtree.STKey(rune('p')), suffixtree.STKey(rune('p')), suffixtree.STKey(rune('i')), suffixtree.STKey(rune('$'))}
+	result = searcher.Find(ppiDollar)
 	expectedPPIdollar := []int64{8}
 	if !reflect.DeepEqual(result, expectedPPIdollar) {
 		t.Errorf("Find failed, got %s, want %s", result, expectedPPIdollar)
@@ -310,10 +311,10 @@ func sliceappend(old, new []rune) []rune {
 	return newSlice
 }
 
-func convertToSTKey(runes []rune) []STKey {
-	result := []STKey{}
+func convertToSTKey(runes []rune) []suffixtree.STKey {
+	result := []suffixtree.STKey{}
 	for i := 0; i < len(runes); i++ {
-		result = append(result, STKey(runes[i]))
+		result = append(result, suffixtree.STKey(runes[i]))
 	}
 	return result
 }
@@ -333,18 +334,18 @@ func TestRandomString(t *testing.T) {
 		s = sliceappend(s, []rune("mississippi"))
 		s = sliceappend(s, RandStringRunes(100))*/
 
-		dataSource := NewRuneDataSource(s)
-		ukkonen := NewUkkonen(dataSource)
-		ukkonen.drainDataSource()
+		dataSource := suffixtree.NewRuneDataSource(s)
+		ukkonen := suffixtree.NewUkkonen(dataSource)
+		ukkonen.DrainDataSource()
 		ukkonen.Finish()
 		st := ukkonen.Tree()
 		//treePrintWithTitle(fmt.Sprintf("Test '%s'", string(s)), st.Root(), ukkonen.Location())
-		TreeCheck(st.Root(), dataSource)
+		suffixtree.TreeCheck(st.Root(), dataSource)
 		for i := int64(0); i < int64(len(s)); i++ {
-			searcher := NewSearcher(st.Root(), dataSource)
+			searcher := suffixtree.NewSearcher(st.Root(), dataSource)
 			searchFor := s[i:len(s)]
 			fmt.Printf("search for suffix %s\n", string(searchFor))
-			result := searcher.find(convertToSTKey(searchFor))
+			result := searcher.Find(convertToSTKey(searchFor))
 			if len(result) == 0 {
 				fmt.Printf("Did not find %s at all\n", string(searchFor))
 			} else {
@@ -364,8 +365,8 @@ func TestRandomString(t *testing.T) {
 		}
 		//treePrintWithTitle("test", st.Root(), ukkonen.Location())
 		/*searcher := NewSearcher(st.Root(), dataSource)
-		searchFor := []STKey{}
-		searchFor = append(searchFor, STKey(rune('B')))
+		searchFor := []suffixtree.STKey{}
+		searchFor = append(searchFor, suffixtree.STKey(rune('B')))
 		result := searcher.find(searchFor)
 		if len(result) == 0 {
 			t.Errorf("Expected >1 result, got %d", len(result))

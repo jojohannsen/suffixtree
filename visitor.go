@@ -54,7 +54,7 @@ func NewDFS(visitor Visitor) *DFS {
 
 func (dfs *DFS) Traverse(node Node) {
 	if dfs.visitor.PreVisit(node) {
-		if (dfs.visitor.Visit(node)) {
+		if dfs.visitor.Visit(node) {
 			for _, child := range node.OutgoingNodes() {
 				dfs.Traverse(child)
 			}
@@ -64,11 +64,14 @@ func (dfs *DFS) Traverse(node Node) {
 }
 
 // general descriptive visitor behaviors
-type noPostVisit struct {}
+type noPostVisit struct{}
+
 func (npv *noPostVisit) PostVisit(node Node) bool {
 	return true
 }
-type noDone struct {}
+
+type noDone struct{}
+
 func (nd *noDone) Done() bool {
 	return false
 }
@@ -79,7 +82,7 @@ type SuffixLinkPrinter struct {
 	noDone
 }
 
-func NewSuffixLinkPrinter() (*SuffixLinkPrinter) {
+func NewSuffixLinkPrinter() *SuffixLinkPrinter {
 	return &SuffixLinkPrinter{}
 }
 
@@ -88,17 +91,16 @@ func (slp *SuffixLinkPrinter) PreVisit(node Node) bool {
 }
 
 func (slp *SuffixLinkPrinter) Visit(node Node) bool {
-	if (node.isInternal()) {
-		sl := node.suffixLink()
+	if node.isInternal() {
+		sl := node.SuffixLink()
 		if sl == nil {
 			fmt.Printf("(%d->NIL)", node.Id())
 		} else {
-			fmt.Printf("(%d->%d)", node.Id(), node.suffixLink().Id())
-			fmt.Printf(" depth %d, %d\n", node.depth(), node.suffixLink().depth())
+			fmt.Printf("(%d->%d)", node.Id(), node.SuffixLink().Id())
+			fmt.Printf(" depth %d, %d\n", node.depth(), node.SuffixLink().depth())
 		}
 		return true
 	} else {
 		return false
 	}
 }
-
