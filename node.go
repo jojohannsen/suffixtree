@@ -41,7 +41,7 @@ type Node interface {
 func printPathToNode(node Node, dataSource DataSource) {
 	result := ""
 	for node.parent() != nil {
-		result = fmt.Sprintf("%s%s", dataSource.stringFrom(node.IncomingEdge().StartOffset, node.IncomingEdge().EndOffset), result)
+		result = fmt.Sprintf("%s%s", dataSource.StringFrom(node.IncomingEdge().StartOffset, node.IncomingEdge().EndOffset), result)
 		node = node.parent()
 	}
 
@@ -51,7 +51,7 @@ func printPathToNode(node Node, dataSource DataSource) {
 func pathToNode(node Node, dataSource DataSource) string {
 	result := ""
 	for node.parent() != nil {
-		result = fmt.Sprintf("%s%s", dataSource.stringFrom(node.IncomingEdge().StartOffset, node.IncomingEdge().EndOffset), result)
+		result = fmt.Sprintf("%s%s", dataSource.StringFrom(node.IncomingEdge().StartOffset, node.IncomingEdge().EndOffset), result)
 		node = node.parent()
 	}
 	return result

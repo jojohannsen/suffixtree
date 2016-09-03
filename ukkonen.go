@@ -60,7 +60,6 @@ func (b *ukkonen) Extend() bool {
 	// increment the offset after each successful read
 	defer func(b *ukkonen) {
 		b.offset++
-		//treePrintWithTitle(fmt.Sprintf("FINISHED extend(%d)", value), b.root, b.location)
 	}(b)
 
 	// otherwise, extend until done
@@ -135,7 +134,7 @@ func (b *ukkonen) extendWithValue(value STKey) bool {
 		}
 		// we are on the edge, see if the character at the offset matches
 		valueOffset := b.location.Edge.StartOffset + b.location.OffsetFromTop
-		if b.dataSource.keyAtOffset(valueOffset) == value {
+		if b.dataSource.KeyAtOffset(valueOffset) == value {
 			// Rule 3, value already in tree, change location and we are done
 			b.location.OffsetFromTop++
 			if b.location.OffsetFromTop == b.location.Edge.length() {

@@ -33,7 +33,7 @@ func (t *traverser) traverseDownValue(location *Location, value STKey) bool {
 		}
 	} else {
 		offsetToCheck := location.Base.IncomingEdge().StartOffset + location.OffsetFromTop
-		if t.dataSource.keyAtOffset(offsetToCheck) == value {
+		if t.dataSource.KeyAtOffset(offsetToCheck) == value {
 			t.traverseEdgeValue(location)
 			return true
 		}
@@ -99,7 +99,7 @@ func (t *traverser) traverseEdgeValue(location *Location) {
 // skip count down traversal
 func (t *traverser) traverseDown(location *Location) {
 	for t.numberValuesTraversed > 0 {
-		location.Edge, location.Base = location.Base.outgoingEdgeNode(t.dataSource.keyAtOffset(t.traversedDataOffset))
+		location.Edge, location.Base = location.Base.outgoingEdgeNode(t.dataSource.KeyAtOffset(t.traversedDataOffset))
 		edgeLength := location.Edge.length()
 		if (t.numberValuesTraversed < edgeLength) || (edgeLength == EdgeTerminatesAtEnd) {
 			location.OffsetFromTop = t.numberValuesTraversed
