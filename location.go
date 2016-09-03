@@ -30,14 +30,12 @@ func (location *Location) String() string {
 	if location == nil {
 		return "Location=NIL"
 	}
-	edge := "nil"
-	if location.Edge != nil {
-		edge = fmt.Sprintf("%s", location.Edge)
+
+	if location.OnNode {
+		return fmt.Sprintf("Location on Node %d", location.Base.Id())
+	} else {
+		return fmt.Sprintf("Location on Edge, OffsetFromTop=%d, node is %d",
+			location.OffsetFromTop, location.Base.Id())
 	}
-	node := "nil"
-	if location.Base != nil {
-		node = fmt.Sprintf("%s", location.Base)
-	}
-	return fmt.Sprintf("Location(%s, %t, %d, %s)",
-		edge, location.OnNode, location.OffsetFromTop, node)
+
 }

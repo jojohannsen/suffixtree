@@ -3,7 +3,7 @@ package suffixtree
 import "fmt"
 
 type Traverser interface {
-	traverseToNextSuffix(location *Location)
+	traverseToNextSuffix(location *Location, debugChannel    chan string)
 	traverseOne(location *Location, value STKey)
 	traverseDownValue(location *Location, value STKey) bool
 }
@@ -42,17 +42,30 @@ func (t *traverser) traverseDownValue(location *Location, value STKey) bool {
 }
 
 // set the Location to be at the next suffix
-func (t *traverser) traverseToNextSuffix(location *Location) {
+func (t *traverser) traverseToNextSuffix(location *Location, debugChannel    chan string) {
 	t.traverseUp(location)
+	if debugChannel != nil {
+		debugChannel <- fmt.Sprintf("   after traverseUp %s, numberValuesTraversed %d", location, t.numberValuesTraversed)
+	}
 	t.traverseSuffixLink(location)
+	if debugChannel != nil {
+		debugChannel <- fmt.Sprintf("   after traverseSuffixLinke %s", location)
+	}
 	t.traverseDown(location)
+	if debugChannel != nil {
+		debugChannel <- fmt.Sprintf("   after traverseDown %s", location)
+	}
 }
 
 func (t *traverser) traverseUp(location *Location) {
+	if location.OnNode {
+		t.numberValuesTraversed = location.Base.IncomingEdge().length()
+	} else {
+		t.numberValuesTraversed = location.OffsetFromTop
+	}
 	location.OnNode = true
-	t.numberValuesTraversed = location.OffsetFromTop
 	location.OffsetFromTop = 0
-	t.traversedDataOffset = location.Edge.StartOffset + location.OffsetFromTop
+	t.traversedDataOffset = location.Edge.StartOffset
 	location.Base = location.Base.parent()
 	location.Edge = location.Base.IncomingEdge()
 }

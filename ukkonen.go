@@ -65,39 +65,36 @@ func (b *ukkonen) Extend() bool {
 
 	// otherwise, extend until done
 	if b.debugChannel != nil {
-		b.debugChannel <- fmt.Sprintf("Extend with value '%s' START", string(value))
+		b.debugChannel <- fmt.Sprintf("Extend with value '%s' at %s", string(value), b.location)
 	}
 
 	b.finish(value)
 	if b.debugChannel != nil {
-		b.debugChannel <- fmt.Sprintf("Extend with value '%s' END", string(value))
+		b.debugChannel <- fmt.Sprintf("Done with extension for '%s'", string(value))
 	}
 	return true
 }
 
+func (b *ukkonen) prepareForNextExtension() {
+	if b.debugChannel != nil {
+		b.debugChannel <- fmt.Sprintf(" prepareForNextExtension starting at %s", b.location)
+	}
+	b.traverser.traverseToNextSuffix(b.location, b.debugChannel)
+	if b.debugChannel != nil {
+		b.debugChannel <- fmt.Sprintf(" .. after traverseToNextSuffix %s", b.location)
+	}
+	// if we are on the root, and there's a node needing a suffix link, set it
+	// if it's not the root, we will be creating it here, and have to set it
+	// after it gets created
+	if b.location.Base.isRoot() && b.needsSuffixLink != nil {
+		b.needsSuffixLink.SetSuffixLink(b.location.Base)
+		b.needsSuffixLink = nil
+	}
+}
+
 func (b *ukkonen) finish(value STKey) {
-	if b.debugChannel != nil {
-		b.debugChannel <- fmt.Sprintf("OK, finish off value")
-	}
 	for b.extendWithValue(value) {
-		if b.debugChannel != nil {
-			b.debugChannel <- fmt.Sprintf("location after extendWithValue = %s", b.location)
-		}
-		b.traverser.traverseToNextSuffix(b.location)
-		fmt.Printf("%s\n", b.location)
-		if b.debugChannel != nil {
-			b.debugChannel <- fmt.Sprintf("location after traverseToNextSuffix = %s", b.location)
-		}
-		// if we are on the root, and there's a node needing a suffix link, set it
-		// if it's not the root, we will be creating it here, and have to set it
-		// after it gets created
-		if b.location.Base.isRoot() && b.needsSuffixLink != nil {
-			b.needsSuffixLink.SetSuffixLink(b.location.Base)
-			b.needsSuffixLink = nil
-		}
-	}
-	if b.debugChannel != nil {
-		b.debugChannel <- fmt.Sprintf("Done with this value")
+		b.prepareForNextExtension()
 	}
 }
 
@@ -108,7 +105,7 @@ func (b *ukkonen) Finish() {
 func (b *ukkonen) extendWithValue(value STKey) bool {
 	if b.location.OnNode {
 		if b.debugChannel != nil {
-			b.debugChannel <- fmt.Sprintf("We are on node %d", b.location.Base.Id())
+			b.debugChannel <- fmt.Sprintf(" extendWithValue on Node %d", b.location.Base.Id())
 		}
 		// if the previous node needs a suffix link, this is the place
 		if b.needsSuffixLink != nil {
@@ -117,24 +114,33 @@ func (b *ukkonen) extendWithValue(value STKey) bool {
 		}
 		// if child value is there, just update location
 		if b.location.Base.EdgeFollowing(value) != nil {
+			if b.debugChannel != nil {
+				b.debugChannel <- fmt.Sprintf("   node has an edge with that value, nothing to do")
+			}
 			b.traverser.traverseOne(b.location, value)
 			return false
 		} else {
 			// otherwise we add the value
-			b.location.Base.addLeafEdgeNode(value, b.offset)
+			edge, node := b.location.Base.addLeafEdgeNode(value, b.offset)
+			if b.debugChannel != nil {
+				b.debugChannel <- fmt.Sprintf("   creating leaf edge, new node is %d, edge %s", node.Id(), edge)
+			}
 			b.location.OnNode = true
 			return !b.location.Base.isRoot()
 		}
 
 	} else {
 		if b.debugChannel != nil {
-			b.debugChannel <- fmt.Sprintf("We are on edge offset %d for node %d", b.location.OffsetFromTop, b.location.Base.Id())
+			b.debugChannel <- fmt.Sprintf(" extendWithValue on Edge, offset %d ending at Node %d", b.location.OffsetFromTop, b.location.Base.Id())
 		}
 		// we are on the edge, see if the character at the offset matches
 		valueOffset := b.location.Edge.StartOffset + b.location.OffsetFromTop
 		if b.dataSource.keyAtOffset(valueOffset) == value {
 			// Rule 3, value already in tree, change location and we are done
 			b.location.OffsetFromTop++
+			if b.location.OffsetFromTop == b.location.Edge.length() {
+				b.location.OnNode = true
+			}
 			return false
 		} else if b.location.Base.isRoot() {
 			// add leaf, set location
@@ -149,6 +155,9 @@ func (b *ukkonen) extendWithValue(value STKey) bool {
 			b.needsSuffixLink = b.builder.split(b.location.Base.parent(), b.location.Base, b.location.Edge, b.location.OffsetFromTop)
 			if previousNeedsSuffixLink != nil {
 				previousNeedsSuffixLink.SetSuffixLink(b.needsSuffixLink)
+			}
+			if b.debugChannel != nil {
+				b.debugChannel <- fmt.Sprintf(" extendWithValue split edge, creating Node %d", b.needsSuffixLink.Id())
 			}
 			// - add the new leaf node
 			leafEdge, leafNode := NewLeafEdgeNode(b.needsSuffixLink, b.offset)
