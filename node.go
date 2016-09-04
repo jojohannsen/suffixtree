@@ -29,7 +29,7 @@ type Node interface {
 	// child Nodes and outgoing Edges
 	AddOutgoingEdgeNode(key STKey, edge *Edge, node Node)
 	outgoingEdgeNode(key STKey) (*Edge, Node)
-	addLeafEdgeNode(key STKey, offset int64) (*Edge, Node)
+	addLeafEdgeNode(id int32, key STKey, offset int64) (*Edge, Node)
 	EdgeFollowing(key STKey) *Edge
 	NodeFollowing(key STKey) Node
 	OutgoingNodes() []Node
@@ -69,12 +69,14 @@ type idFactory struct {
 	_id int32
 }
 
-func (factory *idFactory) nextId() int32 {
+func (factory *idFactory) NextId() int32 {
 	factory._id++
 	return factory._id
 }
 
-var nodeIdFactory = &idFactory{0}
+func NewNodeIdFactory() (factory *idFactory){
+	return &idFactory{0}
+}
 
 // Outgoing edges common to Root and Internal Nodes
 type hasOutgoing struct {
@@ -253,9 +255,9 @@ type rootNode struct {
 	noSuffixLink
 }
 
-func NewRootNode() Node {
+func NewRootNode(id int32) Node {
 	return &rootNode{
-		hasId{nodeIdFactory.nextId()},
+		hasId{id},
 		hasOutgoing{make(map[STKey]*Edge), make(map[STKey]Node)},
 		noIncomingEdge{},
 		noSuffixLink{}}
@@ -273,8 +275,8 @@ func (root *rootNode) isInternal() bool {
 	return false
 }
 
-func (root *rootNode) addLeafEdgeNode(key STKey, offset int64) (*Edge, Node) {
-	edge, node := NewLeafEdgeNode(root, offset)
+func (root *rootNode) addLeafEdgeNode(id int32, key STKey, offset int64) (*Edge, Node) {
+	edge, node := NewLeafEdgeNode(id, root, offset)
 	root.AddOutgoingEdgeNode(key, edge, node)
 	return edge, node
 }
@@ -287,9 +289,9 @@ type internalNode struct {
 	hasSuffixLink
 }
 
-func NewInternalNode(parent Node, incoming *Edge) Node {
+func NewInternalNode(id int32, parent Node, incoming *Edge) Node {
 	return &internalNode{
-		hasId{nodeIdFactory.nextId()},
+		hasId{id},
 		hasOutgoing{make(map[STKey]*Edge), make(map[STKey]Node)},
 		hasIncomingEdge{parent, incoming},
 		hasSuffixLink{nil}}
@@ -313,8 +315,8 @@ func (internal *internalNode) isInternal() bool {
 	return true
 }
 
-func (internal *internalNode) addLeafEdgeNode(key STKey, offset int64) (*Edge, Node) {
-	edge, node := NewLeafEdgeNode(internal, offset)
+func (internal *internalNode) addLeafEdgeNode(id int32, key STKey, offset int64) (*Edge, Node) {
+	edge, node := NewLeafEdgeNode(id, internal, offset)
 	internal.AddOutgoingEdgeNode(key, edge, node)
 	return edge, node
 }
@@ -328,10 +330,10 @@ type leafNode struct {
 	_suffixOffset int64
 }
 
-func NewLeafEdgeNode(parent Node, suffix int64) (*Edge, Node) {
+func NewLeafEdgeNode(id int32, parent Node, suffix int64) (*Edge, Node) {
 	leafEdge := NewLeafEdge(suffix)
 	return leafEdge, &leafNode{
-		hasId{nodeIdFactory.nextId()},
+		hasId{id},
 		noOutgoing{},
 		hasIncomingEdge{parent, leafEdge},
 		noSuffixLink{}, suffix - parent.depth()}
@@ -345,7 +347,7 @@ func (leaf *leafNode) isInternal() bool {
 	return false
 }
 
-func (leaf *leafNode) addLeafEdgeNode(key STKey, offset int64) (*Edge, Node) {
+func (leaf *leafNode) addLeafEdgeNode(id int32, key STKey, offset int64) (*Edge, Node) {
 	panic("Leaf cannot have children")
 }
 

@@ -22,6 +22,7 @@ type ukkonen struct {
 	needsSuffixLink Node
 	builder         Builder
 	traverser       Traverser
+	idFactory       *idFactory
 	debugChannel    chan string
 }
 
@@ -38,11 +39,12 @@ func (b *ukkonen) Location() *Location {
 }
 
 func NewUkkonen(dataSource DataSource) Ukkonen {
-	suffixTree := NewSuffixTree(dataSource)
+	nodeIdFactory := NewNodeIdFactory()
+	suffixTree := NewSuffixTree(NewRootNode(nodeIdFactory.NextId()), dataSource)
 	root := suffixTree.Root()
 	return &ukkonen{dataSource.STKeys(), 0, NewLocation(root), root,
 		suffixTree, dataSource, nil,
-		NewBuilder(dataSource), NewTraverser(dataSource), nil}
+		NewBuilder(nodeIdFactory, dataSource), NewTraverser(dataSource), nodeIdFactory, nil}
 }
 
 func (b *ukkonen) DrainDataSource() {
@@ -120,7 +122,7 @@ func (b *ukkonen) extendWithValue(value STKey) bool {
 			return false
 		} else {
 			// otherwise we add the value
-			edge, node := b.location.Base.addLeafEdgeNode(value, b.offset)
+			edge, node := b.location.Base.addLeafEdgeNode(b.idFactory.NextId(), value, b.offset)
 			if b.debugChannel != nil {
 				b.debugChannel <- fmt.Sprintf("   creating leaf edge, new node is %d, edge %s", node.Id(), edge)
 			}
@@ -143,7 +145,7 @@ func (b *ukkonen) extendWithValue(value STKey) bool {
 			return false
 		} else if b.location.Base.isRoot() {
 			// add leaf, set location
-			leafEdge, leafNode := NewLeafEdgeNode(b.root, b.offset)
+			leafEdge, leafNode := NewLeafEdgeNode(b.idFactory.NextId(), b.root, b.offset)
 			b.location.Base.AddOutgoingEdgeNode(value, leafEdge, leafNode)
 			b.location.Base = leafNode
 			b.location.OffsetFromTop = 0
@@ -159,7 +161,7 @@ func (b *ukkonen) extendWithValue(value STKey) bool {
 				b.debugChannel <- fmt.Sprintf(" extendWithValue split edge, creating Node %d", b.needsSuffixLink.Id())
 			}
 			// - add the new leaf node
-			leafEdge, leafNode := NewLeafEdgeNode(b.needsSuffixLink, b.offset)
+			leafEdge, leafNode := NewLeafEdgeNode(b.idFactory.NextId(), b.needsSuffixLink, b.offset)
 			b.needsSuffixLink.AddOutgoingEdgeNode(value, leafEdge, leafNode)
 
 			// after the split, we are located on the internal node

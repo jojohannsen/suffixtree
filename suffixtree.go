@@ -14,8 +14,7 @@ type suffixTree struct {
 	_dataSource DataSource
 }
 
-func NewSuffixTree(dataSource DataSource) *suffixTree {
-	root := NewRootNode()
+func NewSuffixTree(root Node, dataSource DataSource) *suffixTree {
 	return &suffixTree{root, dataSource}
 }
 

@@ -5,11 +5,12 @@ type Builder interface {
 }
 
 type builder struct {
+	_idFactory *idFactory
 	dataSource DataSource
 }
 
-func NewBuilder(dataSource DataSource) Builder {
-	return &builder{dataSource}
+func NewBuilder(_idFactory *idFactory, dataSource DataSource) Builder {
+	return &builder{_idFactory, dataSource}
 }
 
 // split an Edge, return the newly created Node
@@ -17,7 +18,7 @@ func (b *builder) split(parent, child Node, edge *Edge, splitOffset int64) Node 
 	topEdge := edge
 	bottomEdge := NewEdge(topEdge.StartOffset+splitOffset, topEdge.EndOffset)
 	topEdge.EndOffset = bottomEdge.StartOffset - 1
-	internalNode := NewInternalNode(parent, topEdge)
+	internalNode := NewInternalNode(b._idFactory.NextId(), parent, topEdge)
 	parent.AddOutgoingEdgeNode(b.dataSource.KeyAtOffset(topEdge.StartOffset), topEdge, internalNode)
 	internalNode.AddOutgoingEdgeNode(b.dataSource.KeyAtOffset(bottomEdge.StartOffset), bottomEdge, child)
 	child.setIncoming(internalNode, bottomEdge)
