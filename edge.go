@@ -6,18 +6,18 @@ import "fmt"
 // the Node below the Edge refers to it as a incomingEdge
 
 type Edge struct {
-	StartOffset int64
-	EndOffset   int64
+	StartOffset int32
+	EndOffset   int32
 }
 
-const FinalOffset int64 = -1
-const EdgeTerminatesAtEnd int64 = -2
+const FinalOffset int32 = -1
+const EdgeTerminatesAtEnd int32 = -2
 
-func NewEdge(startOffset, endOffset int64) *Edge {
+func NewEdge(startOffset, endOffset int32) *Edge {
 	return &Edge{startOffset, endOffset}
 }
 
-func NewLeafEdge(startOffset int64) *Edge {
+func NewLeafEdge(startOffset int32) *Edge {
 	return &Edge{startOffset, FinalOffset}
 }
 
@@ -25,7 +25,7 @@ func (edge *Edge) String() string {
 	return fmt.Sprintf("[%d,%d]", edge.StartOffset, edge.EndOffset)
 }
 
-func (edge *Edge) length() int64 {
+func (edge *Edge) length() int32 {
 	if edge.EndOffset == FinalOffset {
 		return EdgeTerminatesAtEnd
 	}

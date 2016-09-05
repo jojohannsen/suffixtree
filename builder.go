@@ -1,7 +1,7 @@
 package suffixtree
 
 type Builder interface {
-	split(parent, child Node, edge *Edge, splitOffset int64) Node
+	split(parent, child Node, edge *Edge, splitOffset int32) Node
 }
 
 type builder struct {
@@ -14,7 +14,7 @@ func NewBuilder(_idFactory *idFactory, dataSource DataSource) Builder {
 }
 
 // split an Edge, return the newly created Node
-func (b *builder) split(parent, child Node, edge *Edge, splitOffset int64) Node {
+func (b *builder) split(parent, child Node, edge *Edge, splitOffset int32) Node {
 	topEdge := edge
 	bottomEdge := NewEdge(topEdge.StartOffset+splitOffset, topEdge.EndOffset)
 	topEdge.EndOffset = bottomEdge.StartOffset - 1

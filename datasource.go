@@ -11,9 +11,9 @@ import (
 // A DataSource provides a sequence of STKey values over a channel, and allows individual STKey values
 // to be retrieved by their offset.
 type DataSource interface {
-	KeyAtOffset(int64) STKey
+	KeyAtOffset(int32) STKey
 	STKeys() <-chan STKey
-	StringFrom(start, end int64) string
+	StringFrom(start, end int32) string
 }
 
 type stringDataSource struct {
@@ -37,7 +37,7 @@ func NewStringDataSource(s string) DataSource {
 	return NewRuneDataSource(runes)
 }
 
-func (dataSource *stringDataSource) KeyAtOffset(offset int64) STKey {
+func (dataSource *stringDataSource) KeyAtOffset(offset int32) STKey {
 	return STKey(dataSource.runes[offset])
 }
 
@@ -45,7 +45,7 @@ func (dataSource *stringDataSource) STKeys() <-chan STKey {
 	return dataSource.stream
 }
 
-func (s *stringDataSource) StringFrom(start, end int64) string {
+func (s *stringDataSource) StringFrom(start, end int32) string {
 	x := ""
 	if end < 0 {
 		end = start
@@ -89,8 +89,8 @@ func NewFileDataSource(filePath string) DataSource {
 	return &fileDataSource{positionalReader, dataChannel, []byte{0}}
 }
 
-func (f *fileDataSource) KeyAtOffset(offset int64) STKey {
-	f.positionalReader.Seek(offset, os.SEEK_SET)
+func (f *fileDataSource) KeyAtOffset(offset int32) STKey {
+	f.positionalReader.Seek(int64(offset), os.SEEK_SET)
 	f.positionalReader.Read(f.singleByte)
 	return STKey(f.singleByte[0])
 }
@@ -99,7 +99,7 @@ func (f *fileDataSource) STKeys() <-chan STKey {
 	return f.stream
 }
 
-func (f *fileDataSource) StringFrom(start, end int64) string {
+func (f *fileDataSource) StringFrom(start, end int32) string {
 	var byteArray = make([]byte, end - start + 1)
 	f.positionalReader.Read(byteArray)
 	return string(byteArray)

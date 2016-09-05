@@ -10,8 +10,8 @@ type Traverser interface {
 
 type traverser struct {
 	dataSource            DataSource
-	numberValuesTraversed int64
-	traversedDataOffset   int64
+	numberValuesTraversed int32
+	traversedDataOffset   int32
 }
 
 func NewTraverser(dataSource DataSource) Traverser {

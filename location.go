@@ -18,7 +18,7 @@ import "fmt"
 type Location struct {
 	Edge          *Edge
 	OnNode        bool
-	OffsetFromTop int64
+	OffsetFromTop int32
 	Base          Node
 }
 

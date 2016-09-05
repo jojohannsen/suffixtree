@@ -76,7 +76,9 @@ func (nd *noDone) Done() bool {
 	return false
 }
 
-// Suffix Link Printer
+// Visitor Implementations
+
+// Suffix Link Printer prints all suffix links for a tree
 type SuffixLinkPrinter struct {
 	noPostVisit
 	noDone
@@ -104,3 +106,32 @@ func (slp *SuffixLinkPrinter) Visit(node Node) bool {
 		return false
 	}
 }
+
+// Depth visitor sends out sets of suffixes each time specified depth is reached
+type DepthVisitor struct {
+	noPostVisit
+	noDone
+	maxDepth int32
+	outChan chan<- []int32
+}
+
+func NewDepthVisitor(depth int32, outChan chan<- []int32) *DepthVisitor {
+	dv := &DepthVisitor{}
+	dv.maxDepth = depth
+	dv.outChan = outChan
+	return dv
+}
+
+func (dv *DepthVisitor) PreVisit(node Node) bool {
+	if node.IsLeaf() || (node.depth() >= dv.maxDepth) {
+		dv.outChan <- node.ChildSuffixes([]int32{})
+		return false
+	}
+	return true
+}
+
+func (dv *DepthVisitor) Visit(node Node) bool {
+	return true
+}
+
+

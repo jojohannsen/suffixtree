@@ -14,7 +14,7 @@ type Ukkonen interface {
 
 type ukkonen struct {
 	dataChannel     <-chan STKey
-	offset          int64
+	offset          int32
 	location        *Location
 	root            Node
 	suffixTree      SuffixTree

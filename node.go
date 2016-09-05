@@ -2,7 +2,7 @@ package suffixtree
 
 import "fmt"
 
-const UnspecifiedOffset int64 = -1
+const UnspecifiedOffset int32 = -1
 const MoreThanOne = -1
 
 type STKey int
@@ -13,8 +13,9 @@ type Node interface {
 	isRoot() bool
 	isInternal() bool
 	IsLeaf() bool
-	SuffixOffset() int64 // leaf only
-	depth() int64
+	SuffixOffset() int32 // leaf only
+	ChildSuffixes(suffixOffsets []int32) []int32 // all child suffixes
+	depth() int32
 	Id() int32
 
 	// parent Node and incoming Edge
@@ -29,7 +30,7 @@ type Node interface {
 	// child Nodes and outgoing Edges
 	AddOutgoingEdgeNode(key STKey, edge *Edge, node Node)
 	outgoingEdgeNode(key STKey) (*Edge, Node)
-	addLeafEdgeNode(id int32, key STKey, offset int64) (*Edge, Node)
+	addLeafEdgeNode(id int32, key STKey, offset int32) (*Edge, Node)
 	EdgeFollowing(key STKey) *Edge
 	NodeFollowing(key STKey) Node
 	OutgoingNodes() []Node
@@ -74,7 +75,7 @@ func (factory *idFactory) NextId() int32 {
 	return factory._id
 }
 
-func NewNodeIdFactory() (factory *idFactory){
+func NewNodeIdFactory() (factory *idFactory) {
 	return &idFactory{0}
 }
 
@@ -129,7 +130,7 @@ func (outgoing *hasOutgoing) IsLeaf() bool {
 	return false
 }
 
-func (outgoing *hasOutgoing) SuffixOffset() int64 {
+func (outgoing *hasOutgoing) SuffixOffset() int32 {
 	panic("no suffix for internal nodes")
 }
 
@@ -198,7 +199,7 @@ func (node *hasIncomingEdge) setIncoming(parent Node, incomingEdge *Edge) {
 	node._incomingEdge = incomingEdge
 }
 
-func (node *hasIncomingEdge) depth() int64 {
+func (node *hasIncomingEdge) depth() int32 {
 	return node._incomingEdge.length() + node._parent.depth()
 }
 
@@ -220,7 +221,7 @@ func (node *noIncomingEdge) setIncoming(parent Node, incomingEdge *Edge) {
 	panic("Cannot set incoming")
 }
 
-func (node *noIncomingEdge) depth() int64 {
+func (node *noIncomingEdge) depth() int32 {
 	return 0
 }
 
@@ -275,10 +276,17 @@ func (root *rootNode) isInternal() bool {
 	return false
 }
 
-func (root *rootNode) addLeafEdgeNode(id int32, key STKey, offset int64) (*Edge, Node) {
+func (root *rootNode) addLeafEdgeNode(id int32, key STKey, offset int32) (*Edge, Node) {
 	edge, node := NewLeafEdgeNode(id, root, offset)
 	root.AddOutgoingEdgeNode(key, edge, node)
 	return edge, node
+}
+
+func (root *rootNode) ChildSuffixes(result []int32) []int32 {
+	for _, node := range root.OutgoingNodes() {
+		result = node.ChildSuffixes(result)
+	}
+	return result
 }
 
 // Internal node
@@ -315,10 +323,17 @@ func (internal *internalNode) isInternal() bool {
 	return true
 }
 
-func (internal *internalNode) addLeafEdgeNode(id int32, key STKey, offset int64) (*Edge, Node) {
+func (internal *internalNode) addLeafEdgeNode(id int32, key STKey, offset int32) (*Edge, Node) {
 	edge, node := NewLeafEdgeNode(id, internal, offset)
 	internal.AddOutgoingEdgeNode(key, edge, node)
 	return edge, node
+}
+
+func (internal *internalNode) ChildSuffixes(result []int32) []int32 {
+	for _, node := range internal.OutgoingNodes() {
+		result = node.ChildSuffixes(result)
+	}
+	return result
 }
 
 // Leaf node
@@ -327,10 +342,10 @@ type leafNode struct {
 	noOutgoing
 	hasIncomingEdge
 	noSuffixLink
-	_suffixOffset int64
+	_suffixOffset int32
 }
 
-func NewLeafEdgeNode(id int32, parent Node, suffix int64) (*Edge, Node) {
+func NewLeafEdgeNode(id int32, parent Node, suffix int32) (*Edge, Node) {
 	leafEdge := NewLeafEdge(suffix)
 	return leafEdge, &leafNode{
 		hasId{id},
@@ -347,10 +362,14 @@ func (leaf *leafNode) isInternal() bool {
 	return false
 }
 
-func (leaf *leafNode) addLeafEdgeNode(id int32, key STKey, offset int64) (*Edge, Node) {
+func (leaf *leafNode) addLeafEdgeNode(id int32, key STKey, offset int32) (*Edge, Node) {
 	panic("Leaf cannot have children")
 }
 
-func (leaf *leafNode) SuffixOffset() int64 {
+func (leaf *leafNode) SuffixOffset() int32 {
 	return leaf._suffixOffset
+}
+
+func (leaf *leafNode) ChildSuffixes(result []int32) []int32 {
+	return append(result, leaf.SuffixOffset())
 }
