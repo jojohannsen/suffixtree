@@ -1,11 +1,11 @@
 package suffixtree
 
 import (
+	"bufio"
 	"fmt"
 	"io"
-	"os"
 	"log"
-	"bufio"
+	"os"
 )
 
 // A DataSource provides a sequence of STKey values over a channel, and allows individual STKey values
@@ -14,6 +14,7 @@ type DataSource interface {
 	KeyAtOffset(int32) STKey
 	STKeys() <-chan STKey
 	StringFrom(start, end int32) string
+	StringFromTo(start int32, end string) string
 }
 
 type stringDataSource struct {
@@ -60,10 +61,14 @@ func (s *stringDataSource) StringFrom(start, end int32) string {
 	return result
 }
 
+func (s *stringDataSource) StringFromTo(start int32, end string) string {
+	return "UNIMPLEMENTED"
+}
+
 type fileDataSource struct {
 	positionalReader *os.File
-	stream <-chan STKey
-	singleByte []byte
+	stream           <-chan STKey
+	singleByte       []byte
 }
 
 func NewFileDataSource(filePath string) DataSource {
@@ -100,7 +105,21 @@ func (f *fileDataSource) STKeys() <-chan STKey {
 }
 
 func (f *fileDataSource) StringFrom(start, end int32) string {
-	var byteArray = make([]byte, end - start + 1)
+	var byteArray = make([]byte, end-start+1)
+	f.positionalReader.Seek(int64(start), os.SEEK_SET)
 	f.positionalReader.Read(byteArray)
+	return string(byteArray)
+}
+
+func (f *fileDataSource) StringFromTo(start int32, end string) string {
+	var byteArray = []byte{}
+	f.positionalReader.Seek(int64(start), os.SEEK_SET)
+	for {
+		f.positionalReader.Read(f.singleByte)
+		if f.singleByte[0] == end[0] {
+			break
+		}
+		byteArray = append(byteArray, f.singleByte[0])
+	}
 	return string(byteArray)
 }

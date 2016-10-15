@@ -11,6 +11,7 @@ type Visitor interface {
 	Visit(node Node) bool
 	PostVisit(node Node) bool
 	Done() bool
+	Finish()
 }
 
 type hasVisitor struct {
@@ -52,6 +53,10 @@ func NewDFS(visitor Visitor) *DFS {
 	return &DFS{hasVisitor{visitor}}
 }
 
+func (dfs *DFS) Finish() {
+	dfs.visitor.Finish()
+}
+
 func (dfs *DFS) Traverse(node Node) {
 	if dfs.visitor.PreVisit(node) {
 		if dfs.visitor.Visit(node) {
@@ -76,11 +81,17 @@ func (nd *noDone) Done() bool {
 	return false
 }
 
+type noFinish struct{}
+
+func (nf *noFinish) Finish() {
+}
+
 // Visitor Implementations
 
 // Suffix Link Printer prints all suffix links for a tree
 type SuffixLinkPrinter struct {
 	noPostVisit
+	noFinish
 	noDone
 }
 
@@ -108,12 +119,21 @@ func (slp *SuffixLinkPrinter) Visit(node Node) bool {
 }
 
 // Depth visitor sends out sets of suffixes each time specified depth is reached
+//
+// Each set of suffixes has a common prefix with length at minimum the valueDepth
+// This is why the output channel data type is []int32
 type DepthVisitor struct {
 	noPostVisit
 	noDone
 	maxDepth int32
-	outChan chan<- []int32
+	outChan  chan<- []int32
+
+	// what I want to know once it's done
+	//
+	//   maxDepth (from above)
+	numberOfNodesEmittingValues int32
 }
+
 
 func NewDepthVisitor(depth int32, outChan chan<- []int32) *DepthVisitor {
 	dv := &DepthVisitor{}
@@ -122,8 +142,11 @@ func NewDepthVisitor(depth int32, outChan chan<- []int32) *DepthVisitor {
 	return dv
 }
 
+// returns true if there are deeper nodes to visit,
+// returns false to stop the depth traversal below this node
 func (dv *DepthVisitor) PreVisit(node Node) bool {
-	if node.IsLeaf() || (node.depth() >= dv.maxDepth) {
+	if !node.IsLeaf() && (node.depth() >= dv.maxDepth) {
+		dv.numberOfNodesEmittingValues += 1
 		dv.outChan <- node.ChildSuffixes([]int32{})
 		return false
 	}
@@ -134,4 +157,8 @@ func (dv *DepthVisitor) Visit(node Node) bool {
 	return true
 }
 
-
+func (dv* DepthVisitor) Finish() {
+	fmt.Printf("Depth Visitor has completed\n")
+	fmt.Printf("  depth=%d\n", dv.maxDepth)
+	fmt.Printf("  nodes emitting values=%d\n", dv.numberOfNodesEmittingValues)
+}

@@ -10,6 +10,7 @@ type Ukkonen interface {
 	Tree() SuffixTree
 	Location() *Location
 	DataSource() DataSource
+	NumberValuesLoaded() int32
 }
 
 type ukkonen struct {
@@ -24,6 +25,10 @@ type ukkonen struct {
 	traverser       Traverser
 	idFactory       *idFactory
 	debugChannel    chan string
+}
+
+func (b *ukkonen) NumberValuesLoaded() int32 {
+	return b.offset
 }
 
 func (b *ukkonen) Debug(dChan chan string) {

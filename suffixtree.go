@@ -7,6 +7,7 @@ package suffixtree
 
 type SuffixTree interface {
 	Root() Node
+	DataSource() DataSource
 }
 
 type suffixTree struct {
@@ -20,4 +21,8 @@ func NewSuffixTree(root Node, dataSource DataSource) *suffixTree {
 
 func (st *suffixTree) Root() Node {
 	return st._root
+}
+
+func (st *suffixTree) DataSource() DataSource {
+	return st._dataSource
 }

@@ -13,7 +13,7 @@ type Node interface {
 	isRoot() bool
 	isInternal() bool
 	IsLeaf() bool
-	SuffixOffset() int32 // leaf only
+	SuffixOffset() int32                         // leaf only
 	ChildSuffixes(suffixOffsets []int32) []int32 // all child suffixes
 	depth() int32
 	Id() int32

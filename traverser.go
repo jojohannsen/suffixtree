@@ -3,7 +3,7 @@ package suffixtree
 import "fmt"
 
 type Traverser interface {
-	traverseToNextSuffix(location *Location, debugChannel    chan string)
+	traverseToNextSuffix(location *Location, debugChannel chan string)
 	traverseOne(location *Location, value STKey)
 	traverseDownValue(location *Location, value STKey) bool
 }
@@ -42,7 +42,7 @@ func (t *traverser) traverseDownValue(location *Location, value STKey) bool {
 }
 
 // set the Location to be at the next suffix
-func (t *traverser) traverseToNextSuffix(location *Location, debugChannel    chan string) {
+func (t *traverser) traverseToNextSuffix(location *Location, debugChannel chan string) {
 	t.traverseUp(location)
 	if debugChannel != nil {
 		debugChannel <- fmt.Sprintf("   after traverseUp %s, numberValuesTraversed %d", location, t.numberValuesTraversed)

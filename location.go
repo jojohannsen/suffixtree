@@ -37,5 +37,4 @@ func (location *Location) String() string {
 		return fmt.Sprintf("Location on Edge, OffsetFromTop=%d, node is %d",
 			location.OffsetFromTop, location.Base.Id())
 	}
-
 }

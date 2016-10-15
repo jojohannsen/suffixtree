@@ -6,7 +6,7 @@ Suffix Trees are tree structures with a few types of elements.
 
 A data source provides the sequence of numbers used in the creation of the suffix tree.  Each suffix is represented in the tree, starting at the root of the tree.
 
-The values can be any data type, but are always mapped to a numeric value.
+Non-numeric data types need to be converted to numeric values to be represented in a suffix tree.
 
 ### Node
 
@@ -21,5 +21,13 @@ There are three types of Nodes:
 Selects a sequence of values from a data source, referenced
 as a outgoing edge of one Node and an incoming edge of another Node.
 
+### Suffix Tree Construction
 
+Each value added to the tree is added in constant time, allowing a tree size N to be constructed in O(n) time.
+
+### Suffix Tree Queries
+
+Suffix trees provide constant time responses to queries showing the location of an arbitrary sequence of values.
+First the tree is traversed down the sequence of values, then the subtree is traversed (or precalculated) to
+show the location of each value in the original sequence.
 
