@@ -118,6 +118,7 @@ func (slp *SuffixLinkPrinter) Visit(node Node) bool {
 	}
 }
 
+//
 // Depth visitor sends out sets of suffixes each time specified depth is reached
 //
 // Each set of suffixes has a common prefix with length at minimum the valueDepth

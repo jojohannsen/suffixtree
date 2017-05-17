@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"log"
 	"os"
 )
 
@@ -71,11 +70,11 @@ type fileDataSource struct {
 	singleByte       []byte
 }
 
-func NewFileDataSource(filePath string) DataSource {
+func NewFileDataSource(filePath string) (DataSource, error) {
 	dataChannel := make(chan STKey, 1024)
 	file, err := os.Open(filePath)
 	if err != nil {
-		log.Fatal("File not available")
+		return nil, err
 	}
 	sequentialReader := bufio.NewReader(file)
 	positionalReader, err := os.Open(filePath)
@@ -91,7 +90,7 @@ func NewFileDataSource(filePath string) DataSource {
 		}
 		close(dataChannel)
 	}(sequentialReader, dataChannel)
-	return &fileDataSource{positionalReader, dataChannel, []byte{0}}
+	return &fileDataSource{positionalReader, dataChannel, []byte{0}}, nil
 }
 
 func (f *fileDataSource) KeyAtOffset(offset int32) STKey {

@@ -1,12 +1,16 @@
 package suffixtree
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 type Ukkonen interface {
 	Extend() bool
 	Finish()
 	Debug(dChan chan string)
 	DrainDataSource()
+	DrainDataSourceWithTicks(wg *sync.WaitGroup, tickChannel chan struct{})
 	Tree() SuffixTree
 	Location() *Location
 	DataSource() DataSource
@@ -53,8 +57,22 @@ func NewUkkonen(dataSource DataSource) Ukkonen {
 }
 
 func (b *ukkonen) DrainDataSource() {
-	for b.Extend() {
-	}
+	var wg sync.WaitGroup
+	tickChannel := make(chan struct{}, 1)
+	b.DrainDataSourceWithTicks(&wg,tickChannel)
+}
+//
+// Read everything from the data source, when done signal the waitgroup, and close the tickChannel
+//
+func (b *ukkonen) DrainDataSourceWithTicks(wg *sync.WaitGroup, tickChannel chan struct{}) {
+	wg.Add(1)
+	go func(b *ukkonen, wg *sync.WaitGroup, tickChannel chan struct{}) {
+		defer wg.Done()
+		for b.Extend() {
+			tickChannel <- struct{}{}
+		}
+		close(tickChannel)
+	}(b, wg, tickChannel)
 }
 
 // extend the suffix tree with the next value, returns false if data channel is closed
